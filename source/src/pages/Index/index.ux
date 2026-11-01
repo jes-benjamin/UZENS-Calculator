@@ -186,7 +186,7 @@
     { id: 'bmi', label: 'BMI计算', img: '/Common/menu_bmi.png', route: '/pages/BMI' },
     { id: 'currency', label: '货币换算', img: '/Common/menu_currency.png', route: '/pages/Currency' },
     { id: 'baseconverter', label: '进制转换', img: '/Common/menu_baseconverter.png', route: '/pages/BaseConverter' },
-    { id: 'studytools', label: '高中学习工具', img: '/Common/menu_studytools.png', route: '/pages/StudyTools' },
+    { id: 'studytools', label: '公式大全', img: '/Common/menu_studytools.png', route: '/pages/Formulas' },
     { id: 'equation', label: '解方程', img: '/Common/menu_equation.png', route: '/pages/Equation' },
     { id: 'inequality', label: '解不等式', img: '/Common/menu_inequality.png', route: '/pages/Inequality' },
     { id: 'inequalitygroup', label: '解不等式组', img: '/Common/menu_inequalitygroup.png', route: '/pages/InequalityGroup' },

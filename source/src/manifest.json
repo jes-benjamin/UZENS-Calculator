@@ -84,14 +84,8 @@
       "pages/BaseConverter": {
         "component": "baseconverter"
       },
-      "pages/StudyTools": {
-        "component": "studytools"
-      },
       "pages/Formulas": {
         "component": "formulas"
-      },
-      "pages/Solving": {
-        "component": "solving"
       },
       "pages/Chemical": {
         "component": "chemical"
@@ -279,31 +273,7 @@
           "menuBar": false
         }
       },
-      "pages/StudyTools": {
-        "fullScreen": true,
-        "titleBar": false,
-        "menu": false,
-        "statusBarImmersive": true,
-        "statusBarTextStyle": "light",
-        "statusBarBackgroundColor": "#000000",
-        "statusBarBackgroundOpacity": 0,
-        "menuBarData": {
-          "menuBar": false
-        }
-      },
       "pages/Formulas": {
-        "fullScreen": true,
-        "titleBar": false,
-        "menu": false,
-        "statusBarImmersive": true,
-        "statusBarTextStyle": "light",
-        "statusBarBackgroundColor": "#000000",
-        "statusBarBackgroundOpacity": 0,
-        "menuBarData": {
-          "menuBar": false
-        }
-      },
-      "pages/Solving": {
         "fullScreen": true,
         "titleBar": false,
         "menu": false,
