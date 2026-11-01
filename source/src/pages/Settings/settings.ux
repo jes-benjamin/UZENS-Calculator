@@ -34,6 +34,18 @@
         </div>
       </list-item>
 
+      <list-item class="setting-item" onclick="toggleBgRun">
+        <text class="setting-label">应用后台运行</text>
+        <image class="toggle-img" src="{{bgOn ? '/Common/toggle_on.png' : '/Common/toggle_off.png'}}"></image>
+      </list-item>
+
+      <list-item class="desc-item">
+        <div class="setting-desc">
+          <text class="desc-text">开启后应用退到后台仍可继续运行，</text>
+          <text class="desc-text">关闭后回到表盘将停止运行。</text>
+        </div>
+      </list-item>
+
       <list-item class="setting-item" onclick="openReward">
         <text class="setting-label">赞赏我们</text>
       </list-item>
@@ -145,16 +157,19 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import prompt from '@system.prompt'
 
   var KEY_VIBRATION = 'setting_vibration'
   var KEY_AUTOCALC = 'setting_autocalc'
   var KEY_SMOOTH = 'setting_smooth_curve'
+  var KEY_BG = 'bg_running_v1'
 
   export default {
     private: {
       vibrationOn: true,
       autoCalcOn: true,
-      smoothOn: true
+      smoothOn: true,
+      bgOn: false
     },
 
     onBackPress() {
@@ -203,6 +218,16 @@
           self.smoothOn = true
         }
       })
+      storage.get({
+        key: KEY_BG,
+        success: function(data) {
+          if (data === 'true') {
+            self.bgOn = true
+          } else {
+            self.bgOn = false
+          }
+        }
+      })
     },
 
     doVibrate() {
@@ -236,6 +261,21 @@
         key: KEY_SMOOTH,
         value: this.smoothOn ? 'true' : 'false'
       })
+    },
+
+    toggleBgRun() {
+      this.bgOn = !this.bgOn
+      this.doVibrate()
+      storage.set({
+        key: KEY_BG,
+        value: this.bgOn ? 'true' : 'false'
+      })
+      try {
+        if (this.$app && this.$app.$def && this.$app.$def.setBgRunning) {
+          this.$app.$def.setBgRunning(this.bgOn)
+        }
+      } catch (e) {}
+      prompt.showToast({ message: this.bgOn ? '后台运行已开启' : '后台运行已关闭' })
     },
 
     openReward() {

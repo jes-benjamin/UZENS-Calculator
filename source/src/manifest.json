@@ -23,11 +23,24 @@
     },
     {
       "name": "system.prompt"
+    },
+    {
+      "name": "system.geolocation"
+    }
+  ],
+  "permissions": [
+    {
+      "name": "hapjs.permission.LOCATION"
     }
   ],
   "config": {
     "logLevel": "warn",
-    "designWidth": 466
+    "designWidth": 466,
+    "background": {
+      "features": [
+        "system.geolocation"
+      ]
+    }
   },
   "router": {
     "entry": "pages/Index",

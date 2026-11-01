@@ -1,6 +1,58 @@
 <script>
+  import geolocation from '@system.geolocation'
+  import storage from '@system.storage'
+
+  var BG_KEY = 'bg_running_v1'
+  var bgOn = false
+
   export default {
     onCreate() {},
-    onDestroy() {}
+
+    onDestroy() {
+      stopBackground()
+    },
+
+    onShow() {
+      storage.get({
+        key: BG_KEY,
+        success: function(data) {
+          if (data === 'true') {
+            startBackground()
+          } else {
+            stopBackground()
+          }
+        }
+      })
+    },
+
+    onHide() {
+      // 保持 geolocation.subscribe 持续运行，满足系统后台运行检查
+    },
+
+    setBgRunning(on) {
+      if (on) {
+        startBackground()
+      } else {
+        stopBackground()
+      }
+    }
+  }
+
+  function startBackground() {
+    if (bgOn) return
+    bgOn = true
+    geolocation.subscribe({
+      callback: function(data) {},
+      fail: function(data, code) {
+        // 设备不支持定位（203）时静默停止
+        bgOn = false
+      }
+    })
+  }
+
+  function stopBackground() {
+    if (!bgOn) return
+    bgOn = false
+    geolocation.unsubscribe()
   }
 </script>
