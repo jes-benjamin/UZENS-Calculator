@@ -1,13 +1,13 @@
 <template>
   <div class="page">
     <!-- 公式类型选择 -->
-    <div class="view" if="{{view === 'cats'}}">
+    <div class="view" if="{{!showList}}">
       <div class="back-btn" onclick="goBack">
         <text class="back-text">‹ 返回</text>
       </div>
       <text class="page-title">公式大全</text>
       <list class="cat-list">
-        <list-item class="cat-item" for="{{catNames}}" onclick="selectCat($index)">
+        <list-item class="cat-item" for="{{catNames}}" onclick="selectCat($item)">
           <text class="cat-text">{{$item}}</text>
         </list-item>
         <list-item class="bottom-spacer">
@@ -17,7 +17,7 @@
     </div>
 
     <!-- 类别内公式列表 -->
-    <div class="view" if="{{view === 'list'}}">
+    <div class="view" if="{{showList}}">
       <div class="back-btn" onclick="backToCats">
         <text class="back-text">‹ 类型</text>
       </div>
@@ -458,7 +458,7 @@
 
   export default {
     private: {
-      view: 'cats',
+      showList: false,
       catNames: [],
       currentName: '',
       formulaList: []
@@ -473,7 +473,7 @@
     },
 
     onBackPress() {
-      if (this.view === 'list') {
+      if (this.showList) {
         this.backToCats()
         return true
       }
@@ -486,12 +486,18 @@
     },
 
     backToCats() {
-      this.view = 'cats'
+      this.showList = false
       this.formulaList = []
     },
 
-    selectCat(idx) {
-      var cat = CATEGORIES[idx]
+    selectCat(name) {
+      var cat = null
+      for (var i = 0; i < CATEGORIES.length; i++) {
+        if (CATEGORIES[i].name === name) {
+          cat = CATEGORIES[i]
+          break
+        }
+      }
       if (!cat) return
       this.currentName = cat.name
       var arr = []
@@ -502,7 +508,7 @@
         arr.push({ title: f.title, content: f.content, ch: ch, h: 52 + ch })
       }
       this.formulaList = arr
-      this.view = 'list'
+      this.showList = true
     },
 
     calcLines(str, fontSize, maxWidth) {
