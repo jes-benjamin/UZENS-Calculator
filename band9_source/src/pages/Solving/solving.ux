@@ -1,0 +1,117 @@
+<template>
+  <div class="page">
+    <div class="title-bar">
+      <text class="title-text">解题思路</text>
+    </div>
+
+    <div class="solving-list">
+      <div class="solving-card" for="{{solvingList}}">
+        <text class="solving-title">{{$item.title}}</text>
+        <text class="solving-content">{{$item.content}}</text>
+      </div>
+      <div class="bottom-spacer">
+        <text class="spacer-text"></text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    width: 192px;
+    height: 490px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-bar {
+    width: 171px;
+    height: 18px;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title-text {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .solving-list {
+    width: 177px;
+    height: 430px;
+    margin-top: 2px;
+    overflow: scroll;
+  }
+
+  .solving-card {
+    width: 177px;
+    background-color: #1a1a1a;
+    border-radius: 7px;
+    margin-top: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .solving-title {
+    color: #9370db;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .solving-content {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .bottom-spacer {
+    width: 177px;
+    height: 40px;
+  }
+
+  .spacer-text {
+    font-size: 1px;
+  }
+</style>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      solvingList: [
+        { title: '函数与导数', content: '1.确定定义域 2.求导f\'(x) 3.令f\'(x)=0求极值点 4.列表分析单调性 5.结合端点求最值' },
+        { title: '三角函数', content: '1.化为Asin(ωx+φ)形式 2.确定振幅A、周期T=2π/ω 3.求相位φ 4.画图分析性质' },
+        { title: '数列问题', content: '1.判断等差/等比 2.求通项(公式法/递推法) 3.求前n项和 4.注意n的取值范围' },
+        { title: '立体几何', content: '1.建系确定坐标 2.求法向量 3.利用向量求角(线面角/二面角) 4.验证平行与垂直' },
+        { title: '解析几何', content: '1.设直线方程 2.联立曲线方程消元 3.韦达定理 4.利用条件列方程求解' },
+        { title: '概率统计', content: '1.确定试验类型 2.列分布列 3.求期望E(X)=Σxᵢpᵢ 4.求方差D(X) 5.分析实际意义' },
+        { title: '不等式证明', content: '1.比较法(作差/作商) 2.综合法 3.分析法 4.放缩法 5.数学归纳法' },
+        { title: '排列组合', content: '1.分步用乘法 2.分类用加法 3.有序用排列A 4.无序用组合C 5.注意重复与遗漏' },
+        { title: '向量问题', content: '1.选择基底或建系 2.用坐标表示向量 3.利用点乘/叉乘求角或面积 4.注意方向' },
+        { title: '圆锥曲线', content: '1.判断曲线类型 2.联立方程消元 3.用判别式判断位置 4.利用定义求焦点/准线' },
+        { title: '极值与最值', content: '1.确定变量范围 2.构造函数 3.求导找临界点 4.比较端点与极值点 5.得出结论' },
+        { title: '定积分应用', content: '1.确定积分上下限 2.找被积函数 3.求原函数 4.代入上下限计算 5.注意符号' },
+        { title: '复数运算', content: '1.化标准式a+bi 2.利用i²=-1 3.复数除法有理化分母 4.模|z|=√(a²+b²)' },
+        { title: '参数方程', content: '1.理解参数意义 2.消参得普通方程 3.利用参数求轨迹 4.注意参数取值范围' },
+        { title: '逻辑推理', content: '1.明确已知条件 2.分析命题关系(充要条件) 3.反证法/归纳法 4.验证结论' },
+        { title: '应用题建模', content: '1.读懂题意找变量 2.建立函数/方程模型 3.求解并检验 4.注意实际意义与单位' }
+      ]
+    },
+
+    onBackPress() {
+      router.back()
+      return true
+    }
+  }
+</script>

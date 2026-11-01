@@ -1,0 +1,806 @@
+<template>
+  <div class="page">
+    <div class="title-bar">
+      <text class="title-text">函数图像</text>
+    </div>
+
+    <div class="expr-box">
+      <text class="expr-text">f(x)={{funcExpr}}</text>
+    </div>
+
+    <div class="graph-box">
+      <!-- 网格线（横向） -->
+      <div class="grid-h-line" for="{{gridH}}" style="top:{{$item}}px"></div>
+      <!-- 网格线（纵向） -->
+      <div class="grid-v-line" for="{{gridV}}" style="left:{{$item}}px"></div>
+      <!-- 坐标轴 -->
+      <div class="axis-v"></div>
+      <div class="axis-h"></div>
+      <!-- 函数曲线点 -->
+      <div class="curve-dot" for="{{curveDots}}" style="left:{{$item.l}}px;top:{{$item.t}}px"></div>
+    </div>
+
+    <text class="tip-text" if="{{hasError}}">表达式无效，请返回修改</text>
+    <text class="tip-text" if="{{curveDots.length === 0 && !hasError}}">无法绘制该函数</text>
+
+    <div class="mono-box">
+      <text class="mono-text">单调性: {{monoResult}}</text>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    width: 192px;
+    height: 490px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-bar {
+    width: 180px;
+    height: 20px;
+    margin-top: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title-text {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .expr-box {
+    width: 180px;
+    height: 20px;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    margin-top: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .expr-text {
+    width: 168px;
+    height: 20px;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .graph-box {
+    width: 170px;
+    height: 200px;
+    margin-top: 4px;
+    border-radius: 10px;
+    background-color: #0d0d0d;
+    position: relative;
+  }
+
+  .grid-h-line {
+    position: absolute;
+    left: 0px;
+    width: 170px;
+    height: 1px;
+    background-color: #1f1f1f;
+  }
+
+  .grid-v-line {
+    position: absolute;
+    top: 0px;
+    width: 1px;
+    height: 200px;
+    background-color: #1f1f1f;
+  }
+
+  .axis-v {
+    position: absolute;
+    left: 85px;
+    top: 0px;
+    width: 2px;
+    height: 200px;
+    background-color: #666666;
+  }
+
+  .axis-h {
+    position: absolute;
+    left: 0px;
+    top: 100px;
+    width: 170px;
+    height: 2px;
+    background-color: #666666;
+  }
+
+  .curve-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    margin-top: -2px;
+    border-radius: 2px;
+    background-color: #ffffff;
+  }
+
+  .tip-text {
+    color: #ff6b6b;
+    font-size: 10px;
+    font-weight: 800;
+    margin-top: 3px;
+  }
+
+  .mono-box {
+    width: 180px;
+    min-height: 40px;
+    max-height: 120px;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    margin-top: 6px;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .mono-text {
+    width: 168px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import vibrator from '@system.vibrator'
+
+  var GRAPH_EXPR_KEY = 'graph_expr_v2'
+
+  export default {
+    private: {
+      funcExpr: '0',
+      hasError: false,
+      gridH: [],
+      gridV: [],
+      curveDots: [],
+      vibrationOn: true,
+      monoResult: '分析中...',
+      xValue: 0
+    },
+
+    onInit() {
+      var self = this
+      storage.get({
+        key: 'setting_vibration',
+        success: function(data) {
+          self.vibrationOn = data !== 'false'
+        }
+      })
+    },
+
+    doVibrate() {
+      if (this.vibrationOn) {
+        vibrator.vibrate({ mode: 'short' })
+      }
+    },
+
+    onBackPress() {
+      router.back()
+      return true
+    },
+
+    onShow() {
+      this.buildGrid()
+      this.loadExpression()
+    },
+
+    buildGrid() {
+      var gh = []
+      var gv = []
+      // 横向网格线，每 20px 一条
+      for (var y = 0; y <= 200; y += 20) {
+        gh.push(y)
+      }
+      // 纵向网格线，每 17px 一条
+      for (var x = 0; x <= 170; x += 17) {
+        gv.push(x)
+      }
+      this.gridH = gh
+      this.gridV = gv
+    },
+
+    loadExpression() {
+      var self = this
+      storage.get({
+        key: GRAPH_EXPR_KEY,
+        success: function(data) {
+          self.funcExpr = data || '0'
+          self.generateCurve()
+          self.analyzeMonotonicity()
+        },
+        fail: function() {
+          self.funcExpr = '0'
+          self.generateCurve()
+          self.analyzeMonotonicity()
+        }
+      })
+    },
+
+    analyzeMonotonicity() {
+      var raw = this.funcExpr.replace(/\s/g, '')
+      if (raw.length === 0 || raw === '0') {
+        this.monoResult = '无表达式'
+        return
+      }
+      try {
+        if (this.isPolynomial(raw)) {
+          this.monoResult = this.findMonotonicityPoly(raw)
+        } else {
+          this.monoResult = this.sampleMonotonicity(raw)
+        }
+      } catch (e) {
+        this.monoResult = '无法分析'
+      }
+    },
+
+    isPolynomial(expr) {
+      var s = expr.replace(/\s/g, '')
+      for (var i = 0; i < s.length; i++) {
+        var c = s.charAt(i)
+        if (!((c >= '0' && c <= '9') || c === 'x' || c === '+' || c === '-' || c === '*' || c === '/' || c === '^' || c === '(' || c === ')' || c === '.')) {
+          return false
+        }
+      }
+      return true
+    },
+
+    findMonotonicityPoly(expr) {
+      var tokens = this.tokenizePoly(expr)
+      var result = this.parseExprRD(tokens, 0)
+      var coeffs = result.coeffs
+
+      var deriv = {}
+      for (var key in coeffs) {
+        if (coeffs.hasOwnProperty(key) && key !== 'const') {
+          var deg = parseInt(key.substring(1))
+          var newDeg = deg - 1
+          var newKey = newDeg === 0 ? 'const' : 'x' + newDeg
+          deriv[newKey] = (deriv[newKey] || 0) + coeffs[key] * deg
+        }
+      }
+
+      var nonZero = []
+      for (var k in deriv) {
+        if (deriv.hasOwnProperty(k) && Math.abs(deriv[k]) > 1e-9) {
+          nonZero.push({ key: k, val: deriv[k] })
+        }
+      }
+
+      if (nonZero.length === 0) {
+        return '函数为常数'
+      }
+
+      var maxDeg = 0
+      for (var i = 0; i < nonZero.length; i++) {
+        var d = nonZero[i].key === 'const' ? 0 : parseInt(nonZero[i].key.substring(1))
+        if (d > maxDeg) maxDeg = d
+      }
+
+      var roots = []
+      if (maxDeg === 0) {
+        var c = deriv.const || 0
+        return c > 0 ? '(-\u221e,+\u221e)递增' : '(-\u221e,+\u221e)递减'
+      } else if (maxDeg === 1) {
+        var a = deriv.x1 || 0
+        var b = deriv.const || 0
+        if (Math.abs(a) > 1e-9) {
+          roots.push(-b / a)
+        }
+      } else if (maxDeg === 2) {
+        var a2 = deriv.x2 || 0
+        var b2 = deriv.x1 || 0
+        var c2 = deriv.const || 0
+        var disc = b2 * b2 - 4 * a2 * c2
+        var eps = 1e-9
+        if (disc > eps) {
+          var r1 = (-b2 - Math.sqrt(disc)) / (2 * a2)
+          var r2 = (-b2 + Math.sqrt(disc)) / (2 * a2)
+          if (r1 > r2) { var tmp = r1; r1 = r2; r2 = tmp }
+          roots.push(r1)
+          roots.push(r2)
+        } else if (Math.abs(disc) <= eps) {
+          roots.push(-b2 / (2 * a2))
+        } else {
+          if (a2 > 0) return '(-\u221e,+\u221e)递增'
+          else return '(-\u221e,+\u221e)递减'
+        }
+      } else {
+        return this.sampleMonotonicity(expr)
+      }
+
+      var parts = []
+      var startLabel = '-\u221e'
+
+      for (var i = 0; i <= roots.length; i++) {
+        var testX
+        if (i === 0) {
+          testX = roots[0] - 1
+        } else if (i === roots.length) {
+          testX = roots[roots.length - 1] + 1
+        } else {
+          testX = (roots[i - 1] + roots[i]) / 2
+        }
+
+        var derivVal = this.evaluatePolynomial(deriv, testX)
+        var isInc = derivVal > 0
+        var endLabel = (i === roots.length) ? '+\u221e' : this.formatNum(roots[i])
+
+        if (isInc) {
+          parts.push('(' + startLabel + ',' + endLabel + ')递增')
+        } else {
+          parts.push('(' + startLabel + ',' + endLabel + ')递减')
+        }
+
+        startLabel = endLabel
+      }
+
+      return parts.join(',')
+    },
+
+    evaluatePolynomial(coeffs, x) {
+      var val = 0
+      for (var key in coeffs) {
+        if (coeffs.hasOwnProperty(key)) {
+          if (key === 'const') {
+            val += coeffs[key]
+          } else {
+            var deg = parseInt(key.substring(1))
+            val += coeffs[key] * Math.pow(x, deg)
+          }
+        }
+      }
+      return val
+    },
+
+    sampleMonotonicity(expr) {
+      var samples = [-5, -3, -1, 0, 1, 3, 5]
+      var parts = []
+      var startX = '-\u221e'
+      var prevSign = 0
+
+      for (var i = 0; i < samples.length; i++) {
+        var d = this.numericalDerivative(expr, samples[i])
+        var sign = d > 0 ? 1 : -1
+
+        if (prevSign !== 0 && sign !== prevSign) {
+          var label = this.formatNum(samples[i])
+          if (prevSign > 0) {
+            parts.push('(' + startX + ',' + label + ')递增')
+          } else {
+            parts.push('(' + startX + ',' + label + ')递减')
+          }
+          startX = label
+        }
+        prevSign = sign
+      }
+
+      if (prevSign > 0) {
+        parts.push('(' + startX + ',+\u221e)递增')
+      } else {
+        parts.push('(' + startX + ',+\u221e)递减')
+      }
+
+      return parts.join(',')
+    },
+
+    numericalDerivative(expr, x0) {
+      var h = 1e-5
+      this.xValue = x0 + h
+      var prepared1 = this.prepareExpression(expr)
+      var f1 = this.evalExpression(prepared1, this.xValue)
+
+      this.xValue = x0 - h
+      var prepared2 = this.prepareExpression(expr)
+      var f2 = this.evalExpression(prepared2, this.xValue)
+
+      return (f1 - f2) / (2 * h)
+    },
+
+    // ===== 多项式解析器 =====
+    tokenizePoly(s) {
+      var tokens = []
+      var i = 0
+      while (i < s.length) {
+        var ch = s.charAt(i)
+        if (ch === '+' || ch === '-' || ch === '*' || ch === '/' || ch === '(' || ch === ')') {
+          if (ch === '-' && (tokens.length === 0 || tokens[tokens.length - 1] === '(' || tokens[tokens.length - 1] === '+' || tokens[tokens.length - 1] === '-' || tokens[tokens.length - 1] === '*' || tokens[tokens.length - 1] === '/')) {
+            var num = '-'
+            i++
+            while (i < s.length && ((s.charAt(i) >= '0' && s.charAt(i) <= '9') || s.charAt(i) === '.')) {
+              num += s.charAt(i)
+              i++
+            }
+            tokens.push(num)
+            continue
+          }
+          tokens.push(ch)
+          i++
+        } else if (ch === '^') {
+          tokens.push(ch)
+          i++
+        } else if ((ch >= '0' && ch <= '9') || ch === '.') {
+          var num2 = ''
+          while (i < s.length && ((s.charAt(i) >= '0' && s.charAt(i) <= '9') || s.charAt(i) === '.')) {
+            num2 += s.charAt(i)
+            i++
+          }
+          tokens.push(num2)
+        } else if (ch === 'x' || ch === 'y') {
+          tokens.push(ch)
+          i++
+        } else {
+          i++
+        }
+      }
+      return tokens
+    },
+
+    parseExprRD(tokens, pos) {
+      var sign = 1
+      if (pos < tokens.length && tokens[pos] === '-') {
+        sign = -1
+        pos++
+      } else if (pos < tokens.length && tokens[pos] === '+') {
+        pos++
+      }
+      var res = this.parseTermPoly(tokens, pos)
+      var coeffs = res.coeffs
+      if (sign === -1) {
+        for (var key in coeffs) {
+          if (coeffs.hasOwnProperty(key)) {
+            coeffs[key] = -coeffs[key]
+          }
+        }
+      }
+      var i = res.pos
+      while (i < tokens.length && (tokens[i] === '+' || tokens[i] === '-')) {
+        var op = tokens[i]
+        var termRes = this.parseTermPoly(tokens, i + 1)
+        for (var key2 in termRes.coeffs) {
+          var val = termRes.coeffs[key2]
+          if (op === '-') val = -val
+          coeffs[key2] = (coeffs[key2] || 0) + val
+        }
+        i = termRes.pos
+      }
+      return { coeffs: coeffs, pos: i }
+    },
+
+    parseTermPoly(tokens, pos) {
+      var res = this.parseFactorPoly(tokens, pos)
+      var coeffs = res.coeffs
+      var i = res.pos
+      while (i < tokens.length) {
+        if (tokens[i] === '*' || tokens[i] === '/') {
+          var op = tokens[i]
+          var factorRes = this.parseFactorPoly(tokens, i + 1)
+          if (op === '*') {
+            coeffs = this.multiplyPoly(coeffs, factorRes.coeffs)
+          } else {
+            coeffs = this.dividePoly(coeffs, factorRes.coeffs)
+          }
+          i = factorRes.pos
+        } else if (tokens[i] === '(' || tokens[i] === 'x' || tokens[i] === 'y') {
+          var factorRes2 = this.parseFactorPoly(tokens, i)
+          coeffs = this.multiplyPoly(coeffs, factorRes2.coeffs)
+          i = factorRes2.pos
+        } else {
+          break
+        }
+      }
+      return { coeffs: coeffs, pos: i }
+    },
+
+    parseFactorPoly(tokens, pos) {
+      if (pos >= tokens.length) return { coeffs: {}, pos: pos }
+      var t = tokens[pos]
+
+      if (t === '(') {
+        var exprRes = this.parseExprRD(tokens, pos + 1)
+        var endPos = exprRes.pos
+        if (endPos < tokens.length && tokens[endPos] === ')') {
+          endPos++
+        }
+        return { coeffs: exprRes.coeffs, pos: endPos }
+      }
+
+      if (t === 'x' || t === 'y') {
+        var coeff = 1
+        if (pos + 1 < tokens.length && tokens[pos + 1] === '^') {
+          var power = parseInt(tokens[pos + 2])
+          if (!isNaN(power) && power >= 1) {
+            var key = t + power
+            var obj = {}
+            obj[key] = coeff
+            return { coeffs: obj, pos: pos + 3 }
+          }
+        }
+        var obj2 = {}
+        obj2[t + '1'] = coeff
+        return { coeffs: obj2, pos: pos + 1 }
+      }
+
+      var num = parseFloat(t)
+      if (!isNaN(num)) {
+        if (pos + 1 < tokens.length && (tokens[pos + 1] === 'x' || tokens[pos + 1] === 'y')) {
+          var varToken = tokens[pos + 1]
+          var varCoeff = num
+          if (pos + 2 < tokens.length && tokens[pos + 2] === '^') {
+            var varPower = parseInt(tokens[pos + 3])
+            if (!isNaN(varPower) && varPower >= 1) {
+              var obj3 = {}
+              obj3[varToken + varPower] = varCoeff
+              return { coeffs: obj3, pos: pos + 4 }
+            }
+          }
+          var obj4 = {}
+          obj4[varToken + '1'] = varCoeff
+          return { coeffs: obj4, pos: pos + 2 }
+        }
+        return { coeffs: { const: num }, pos: pos + 1 }
+      }
+
+      return { coeffs: {}, pos: pos + 1 }
+    },
+
+    multiplyPoly(c1, c2) {
+      var result = {}
+      for (var k1 in c1) {
+        if (!c1.hasOwnProperty(k1)) continue
+        for (var k2 in c2) {
+          if (!c2.hasOwnProperty(k2)) continue
+          var v = c1[k1] * c2[k2]
+          var deg1 = k1 === 'const' ? 0 : parseInt(k1.substring(1))
+          var deg2 = k2 === 'const' ? 0 : parseInt(k2.substring(1))
+          var newDeg = deg1 + deg2
+          var newKey = newDeg === 0 ? 'const' : 'x' + newDeg
+          result[newKey] = (result[newKey] || 0) + v
+        }
+      }
+      return result
+    },
+
+    dividePoly(c1, c2) {
+      var keys = Object.keys(c2)
+      if (keys.length === 1 && keys[0] === 'const') {
+        var divisor = c2.const
+        if (divisor === 0) return c1
+        var result = {}
+        for (var k in c1) {
+          if (c1.hasOwnProperty(k)) {
+            result[k] = c1[k] / divisor
+          }
+        }
+        return result
+      }
+      return c1
+    },
+
+    formatNum(n) {
+      var rounded = Math.round(n * 100000) / 100000
+      if (Math.abs(rounded - Math.round(rounded)) < 0.000001) {
+        return String(Math.round(rounded))
+      }
+      var str = String(rounded)
+      if (str.length > 10) {
+        str = rounded.toExponential(4)
+      }
+      return str
+    },
+
+    generateCurve() {
+      var w = 170
+      var cx = 85
+      var cy = 100
+      var scale = 13
+      var dots = []
+
+      this.hasError = false
+
+      try {
+        var expr = this.prepareExpression(this.funcExpr)
+        // 采样间隔 5px，约 34 个点，元素量少不会崩溃
+        for (var px = 0; px < w; px += 5) {
+          var x = (px - cx) / scale
+          var y = this.evalExpression(expr, x)
+          if (isNaN(y) || !isFinite(y) || Math.abs(y) > 1000) {
+            continue
+          }
+          var py = cy - y * scale
+          if (py < 0 || py > 200) {
+            continue
+          }
+          dots.push({ l: px, t: Math.round(py) })
+        }
+      } catch (e) {
+        this.hasError = true
+      }
+
+      this.curveDots = dots
+    },
+
+    prepareExpression(expr) {
+      var out = expr || '0'
+      out = out.replace(/ /g, '')
+      out = out.replace(/π/g, 'pi')
+      out = out.replace(/÷/g, '/')
+      out = out.replace(/×/g, '*')
+      out = out.replace(/e\^x/g, 'exp(x)')
+      out = out.replace(/e\^/g, 'exp(')
+      out = this.replacePower(out)
+      out = this.addImplicitMultiply(out)
+      return out
+    },
+
+    replacePower(expr) {
+      var out = expr
+      out = out.replace(/x\^2/g, '(x^2)')
+      out = out.replace(/x\^3/g, '(x^3)')
+      return out
+    },
+
+    addImplicitMultiply(expr) {
+      var out = expr
+      out = out.replace(/([0-9.])x/g, '$1*x')
+      out = out.replace(/x([0-9.])/g, 'x*$1')
+      out = out.replace(/([0-9.])\(/g, '$1*(')
+      out = out.replace(/\)([0-9.])/g, ')*$1')
+      out = out.replace(/\)x/g, ')*x')
+      out = out.replace(/x\(/g, 'x*(')
+      out = out.replace(/([0-9.])(sin|cos|tan|sqrt|log|ln|lg|exp)/g, '$1*$2')
+      out = out.replace(/\)(sin|cos|tan|sqrt|log|ln|lg|exp)/g, ')*$1')
+      out = out.replace(/e\(/g, 'e*(')
+      return out
+    },
+
+    evalExpression(expr, xValue) {
+      var text = expr
+      var index = 0
+
+      function peek() {
+        return text.charAt(index)
+      }
+
+      function eat(ch) {
+        if (peek() === ch) {
+          index++
+          return true
+        }
+        return false
+      }
+
+      function parse() {
+        var value = parseAddSub()
+        if (index < text.length) {
+          throw new Error('bad expr')
+        }
+        return value
+      }
+
+      function parseAddSub() {
+        var value = parseMulDiv()
+        while (index < text.length) {
+          if (eat('+')) {
+            value = value + parseMulDiv()
+          } else if (eat('-')) {
+            value = value - parseMulDiv()
+          } else {
+            break
+          }
+        }
+        return value
+      }
+
+      function parseMulDiv() {
+        var value = parsePower()
+        while (index < text.length) {
+          if (eat('*')) {
+            value = value * parsePower()
+          } else if (eat('/')) {
+            value = value / parsePower()
+          } else {
+            break
+          }
+        }
+        return value
+      }
+
+      function parsePower() {
+        var value = parseUnary()
+        if (eat('^')) {
+          value = Math.pow(value, parsePower())
+        }
+        return value
+      }
+
+      function parseUnary() {
+        if (eat('+')) return parseUnary()
+        if (eat('-')) return -parseUnary()
+        return parsePrimary()
+      }
+
+      function parsePrimary() {
+        var ch = peek()
+        if (eat('(')) {
+          var value = parseAddSub()
+          if (!eat(')')) {
+            throw new Error('missing )')
+          }
+          return value
+        }
+        if ((ch >= '0' && ch <= '9') || ch === '.') {
+          return parseNumber()
+        }
+        if (ch === 'x') {
+          index++
+          return xValue
+        }
+        return parseName()
+      }
+
+      function parseNumber() {
+        var start = index
+        while (index < text.length) {
+          var ch = peek()
+          if ((ch >= '0' && ch <= '9') || ch === '.') {
+            index++
+          } else {
+            break
+          }
+        }
+        return parseFloat(text.substring(start, index))
+      }
+
+      function parseName() {
+        var start = index
+        while (index < text.length) {
+          var ch = peek()
+          if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+            index++
+          } else {
+            break
+          }
+        }
+        var name = text.substring(start, index)
+        if (name === 'pi') return Math.PI
+        if (!eat('(')) {
+          throw new Error('bad name')
+        }
+        var arg = parseAddSub()
+        if (!eat(')')) {
+          throw new Error('missing )')
+        }
+        if (name === 'sin') return Math.sin(arg)
+        if (name === 'cos') return Math.cos(arg)
+        if (name === 'tan') return Math.tan(arg)
+        if (name === 'sqrt') return Math.sqrt(arg)
+        if (name === 'ln') return Math.log(arg)
+        if (name === 'log') return Math.log(arg) / Math.LN10
+        if (name === 'lg') return Math.log(arg) / Math.LN10
+        if (name === 'exp') return Math.exp(arg)
+        throw new Error('unknown name')
+      }
+
+      return parse()
+    }
+  }
+</script>

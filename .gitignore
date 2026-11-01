@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+sign/
+output/
+.temp*/
+*.rpk
+.DS_Store

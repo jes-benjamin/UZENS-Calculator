@@ -1,0 +1,139 @@
+<template>
+  <div class="page">
+    <div class="title-bar">
+      <text class="title-text">高中学习工具</text>
+    </div>
+
+    <text class="hint-text">诚信考试，作弊可耻，请勿在考试时使用本功能</text>
+
+    <list class="menu-list">
+      <list-item class="menu-item" onclick="openFormulas">
+        <text class="menu-icon-text">公式</text>
+        <text class="menu-text">高中常用数学公式</text>
+      </list-item>
+      <list-item class="menu-item" onclick="openSolving">
+        <text class="menu-icon-text">解题</text>
+        <text class="menu-text">高中解题思路</text>
+      </list-item>
+    </list>
+  </div>
+</template>
+
+<style>
+  .page {
+    width: 192px;
+    height: 490px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-bar {
+    width: 171px;
+    height: 21px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title-text {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .menu-list {
+    width: 177px;
+    height: 400px;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .menu-item {
+    width: 177px;
+    height: 60px;
+    border-radius: 30px;
+    background-color: rgba(147, 112, 219, 0.35);
+    border-width: 1px;
+    border-color: #9370db;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 6px;
+    padding-right: 9px;
+  }
+
+  .menu-icon-text {
+    width: 37px;
+    height: 37px;
+    border-radius: 18px;
+    background-color: #9370db;
+    color: #000000;
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 21px;
+  }
+
+  .menu-text {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    margin-left: 5px;
+  }
+
+  .hint-text {
+    color: #ff0000;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 2px;
+  }
+</style>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import vibrator from '@system.vibrator'
+
+  export default {
+    private: {
+      vibrationOn: true
+    },
+
+    onBackPress() {
+      router.back()
+      return true
+    },
+
+    onInit() {
+      var self = this
+      storage.get({
+        key: 'setting_vibration',
+        success: function(data) {
+          self.vibrationOn = data !== 'false'
+        }
+      })
+    },
+
+    doVibrate() {
+      if (this.vibrationOn) {
+        vibrator.vibrate({ mode: 'short' })
+      }
+    },
+
+    openFormulas() {
+      this.doVibrate()
+      router.push({ uri: '/pages/Formulas' })
+    },
+
+    openSolving() {
+      this.doVibrate()
+      router.push({ uri: '/pages/Solving' })
+    }
+  }
+</script>

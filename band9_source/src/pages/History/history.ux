@@ -1,0 +1,275 @@
+<template>
+  <div class="page">
+    <div class="header-bar">
+      <text class="header-title">历史记录</text>
+    </div>
+
+    <div class="clear-btn" onclick="showConfirmDialog">
+      <text class="clear-btn-text">清空历史</text>
+    </div>
+
+    <div class="history-list">
+      <div class="history-card" for="{{historyList}}" onclick="useHistory($item)">
+        <text class="history-type">{{$item.type}}</text>
+        <text class="history-expr">{{$item.expr}}</text>
+        <text class="history-result">{{$item.result}}</text>
+      </div>
+      <div class="empty-cell" if="{{historyList.length === 0}}">
+        <text class="empty-text">暂无历史记录</text>
+      </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="confirm-overlay" if="{{showConfirm}}">
+      <div class="confirm-top-btn" onclick="cancelDelete">
+        <text class="cancel-icon">✕</text>
+      </div>
+      <text class="confirm-text">是否确定删除？</text>
+      <div class="confirm-bottom-btn" onclick="confirmDelete">
+        <text class="ok-icon">✓</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    width: 192px;
+    height: 490px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header-bar {
+    width: 171px;
+    height: 21px;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-title {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .clear-btn {
+    width: 134px;
+    height: 37px;
+    border-radius: 18px;
+    background-color: rgba(211, 47, 47, 0.35);
+    border-width: 1px;
+    border-color: #d32f2f;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .clear-btn-text {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .history-list {
+    width: 185px;
+    height: 380px;
+    margin-top: 3px;
+    overflow: scroll;
+  }
+
+  .history-card {
+    width: 185px;
+    height: 64px;
+    border-radius: 9px;
+    background-color: #1a1a1a;
+    margin-top: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .history-type {
+    color: #9370db;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .history-expr {
+    color: #888888;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+
+  .history-result {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 2px;
+  }
+
+  .empty-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .empty-text {
+    color: #555555;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 15px;
+  }
+
+  /* ===== 删除确认弹窗 ===== */
+  .confirm-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 192px;
+    height: 490px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .confirm-top-btn {
+    width: 192px;
+    height: 48px;
+    background-color: rgba(100, 149, 237, 0.35);
+    border-width: 1px;
+    border-color: #6495ed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .confirm-text {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .confirm-bottom-btn {
+    width: 192px;
+    height: 48px;
+    background-color: rgba(211, 47, 47, 0.35);
+    border-width: 1px;
+    border-color: #d32f2f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cancel-icon {
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 800;
+  }
+
+  .ok-icon {
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 800;
+  }
+</style>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import vibrator from '@system.vibrator'
+
+  var HISTORY_KEY = 'calc_history_v2'
+
+  export default {
+    private: {
+      historyList: [],
+      showConfirm: false,
+      vibrationOn: true
+    },
+
+    onBackPress() {
+      if (this.showConfirm) {
+        this.showConfirm = false
+        return true
+      }
+      router.back()
+      return true
+    },
+
+    onInit() {
+      var self = this
+      storage.get({
+        key: 'setting_vibration',
+        success: function(data) {
+          self.vibrationOn = data !== 'false'
+        }
+      })
+      this.loadHistory()
+    },
+
+    doVibrate() {
+      if (this.vibrationOn) {
+        vibrator.vibrate({ mode: 'short' })
+      }
+    },
+
+    loadHistory() {
+      var self = this
+      storage.get({
+        key: HISTORY_KEY,
+        success: function(data) {
+          if (data) {
+            try {
+              var list = JSON.parse(data)
+              for (var i = 0; i < list.length; i++) {
+                if (!list[i].type) list[i].type = '计算器'
+              }
+              self.historyList = list.slice().reverse()
+            } catch (e) {
+              self.historyList = []
+            }
+          }
+        },
+        fail: function() {
+          self.historyList = []
+        }
+      })
+    },
+
+    useHistory(item) {
+      this.doVibrate()
+      router.back()
+    },
+
+    showConfirmDialog() {
+      this.doVibrate()
+      this.showConfirm = true
+    },
+
+    cancelDelete() {
+      this.doVibrate()
+      this.showConfirm = false
+    },
+
+    confirmDelete() {
+      this.doVibrate()
+      this.historyList = []
+      this.showConfirm = false
+      storage.delete({
+        key: HISTORY_KEY
+      })
+    }
+  }
+</script>
