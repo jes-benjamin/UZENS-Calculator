@@ -1,0 +1,204 @@
+<template>
+  <div class="page">
+    <div class="header-bar">
+      <text class="header-title">设置</text>
+    </div>
+
+    <div class="settings-list">
+      <div class="setting-item" onclick="toggleVibration">
+        <text class="setting-label">按键震动反馈</text>
+        <image class="toggle-img" src="{{vibrationOn ? '/Common/toggle_on.png' : '/Common/toggle_off.png'}}"></image>
+      </div>
+
+      <div class="setting-item" onclick="toggleAutoCalc">
+        <text class="setting-label">化学方程式自动计算</text>
+        <image class="toggle-img" src="{{autoCalcOn ? '/Common/toggle_on.png' : '/Common/toggle_off.png'}}"></image>
+      </div>
+
+      <div class="desc-item">
+        <div class="setting-desc">
+          <text class="desc-text">开启后输入化学方程式将自动运算结果，</text>
+          <text class="desc-text">关闭后仅进行配平。</text>
+        </div>
+      </div>
+
+      <div class="setting-item" onclick="openReward">
+        <text class="setting-label">赞赏我们</text>
+      </div>
+
+      <div class="setting-item" onclick="openAbout">
+        <text class="setting-label">关于应用</text>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    width: 192px;
+    height: 490px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header-bar {
+    width: 186px;
+    height: 29px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-title {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .settings-list {
+    width: 186px;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: scroll;
+  }
+
+  .setting-item {
+    width: 186px;
+    height: 60px;
+    border-radius: 30px;
+    background-color: rgba(128, 128, 128, 0.35);
+    border-width: 1px;
+    border-color: #888888;
+    margin-top: 3px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .desc-item {
+    width: 186px;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 7px;
+  }
+
+  .setting-desc {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .setting-label {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .toggle-img {
+    width: 50px;
+    height: 25px;
+  }
+
+  .desc-text {
+    color: #888888;
+    font-size: 12px;
+    line-height: 8px;
+  }
+</style>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import vibrator from '@system.vibrator'
+
+  var KEY_VIBRATION = 'setting_vibration'
+  var KEY_AUTOCALC = 'setting_autocalc'
+
+  export default {
+    private: {
+      vibrationOn: true,
+      autoCalcOn: true
+    },
+
+    onBackPress() {
+      router.back()
+      return true
+    },
+
+    onInit() {
+      var self = this
+      storage.get({
+        key: KEY_VIBRATION,
+        success: function(data) {
+          if (data === 'false') {
+            self.vibrationOn = false
+          } else {
+            self.vibrationOn = true
+          }
+        },
+        fail: function() {
+          self.vibrationOn = true
+        }
+      })
+      storage.get({
+        key: KEY_AUTOCALC,
+        success: function(data) {
+          if (data === 'false') {
+            self.autoCalcOn = false
+          } else {
+            self.autoCalcOn = true
+          }
+        },
+        fail: function() {
+          self.autoCalcOn = true
+        }
+      })
+    },
+
+    doVibrate() {
+      if (this.vibrationOn) {
+        vibrator.vibrate({ mode: 'short' })
+      }
+    },
+
+    toggleVibration() {
+      this.vibrationOn = !this.vibrationOn
+      this.doVibrate()
+      storage.set({
+        key: KEY_VIBRATION,
+        value: this.vibrationOn ? 'true' : 'false'
+      })
+    },
+
+    toggleAutoCalc() {
+      this.autoCalcOn = !this.autoCalcOn
+      this.doVibrate()
+      storage.set({
+        key: KEY_AUTOCALC,
+        value: this.autoCalcOn ? 'true' : 'false'
+      })
+    },
+
+    openReward() {
+      this.doVibrate()
+      router.push({ uri: '/pages/Reward' })
+    },
+
+    openAbout() {
+      this.doVibrate()
+      router.push({ uri: '/pages/About' })
+    }
+  }
+</script>

@@ -1,0 +1,389 @@
+{
+  "package": "com.uzens.calculator",
+  "name": "矩阵计算器",
+  "versionName": "5.0.0",
+  "versionCode": 50,
+  "minPlatformVersion": 1200,
+  "icon": "/Common/icon.png",
+  "deviceTypeList": [
+    "watch"
+  ],
+  "features": [
+    {
+      "name": "system.router"
+    },
+    {
+      "name": "system.storage"
+    },
+    {
+      "name": "system.vibrator"
+    }
+  ],
+  "config": {
+    "logLevel": "warn",
+    "designWidth": 192
+  },
+  "router": {
+    "entry": "pages/Index",
+    "pages": {
+      "pages/Index": {
+        "component": "index",
+        "launchMode": "singleTask"
+      },
+      "pages/Standard": {
+        "component": "standard"
+      },
+      "pages/Scientific": {
+        "component": "scientific"
+      },
+      "pages/Unit": {
+        "component": "unit"
+      },
+      "pages/Graph": {
+        "component": "graph"
+      },
+      "pages/GraphResult": {
+        "component": "graphresult"
+      },
+      "pages/Derivative": {
+        "component": "derivative"
+      },
+      "pages/Monotonicity": {
+        "component": "monotonicity"
+      },
+      "pages/LinearRegression": {
+        "component": "linearregression"
+      },
+      "pages/BMI": {
+        "component": "bmi"
+      },
+      "pages/Currency": {
+        "component": "currency"
+      },
+      "pages/Kinship": {
+        "component": "kinship"
+      },
+      "pages/History": {
+        "component": "history"
+      },
+      "pages/About": {
+        "component": "about"
+      },
+      "pages/BaseConverter": {
+        "component": "baseconverter"
+      },
+      "pages/StudyTools": {
+        "component": "studytools"
+      },
+      "pages/Formulas": {
+        "component": "formulas"
+      },
+      "pages/Solving": {
+        "component": "solving"
+      },
+      "pages/Chemical": {
+        "component": "chemical"
+      },
+      "pages/ChemicalAnalysis": {
+        "component": "chemicalanalysis"
+      },
+      "pages/Equation": {
+        "component": "equation"
+      },
+      "pages/Inequality": {
+        "component": "inequality"
+      },
+      "pages/InequalityGroup": {
+        "component": "inequalitygroup"
+      },
+      "pages/Settings": {
+        "component": "settings"
+      },
+      "pages/NumberCase": {
+        "component": "numbercase"
+      },
+      "pages/Reward": {
+        "component": "reward"
+      }
+    }
+  },
+  "display": {
+    "backgroundColor": "#000000",
+    "fullScreen": true,
+    "titleBar": false,
+    "menu": false,
+    "statusBarImmersive": true,
+    "statusBarTextStyle": "light",
+    "statusBarBackgroundColor": "#000000",
+    "statusBarBackgroundOpacity": 0,
+    "menuBarData": {
+      "menuBar": false
+    },
+    "pages": {
+      "pages/Index": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Standard": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Scientific": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Unit": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Graph": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/GraphResult": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/BMI": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Currency": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Kinship": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/History": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/About": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/BaseConverter": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/StudyTools": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Formulas": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Solving": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Chemical": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Equation": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Inequality": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/InequalityGroup": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Settings": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/NumberCase": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "pages/Reward": {
+        "fullScreen": true,
+        "titleBar": false,
+        "menu": false,
+        "statusBarImmersive": true,
+        "statusBarTextStyle": "light",
+        "statusBarBackgroundColor": "#000000",
+        "statusBarBackgroundOpacity": 0,
+        "menuBarData": {
+          "menuBar": false
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+<template>
+  <div class="page">
+    <div class="title-bar">
+      <text class="title-text">数学公式</text>
+    </div>
+
+    <div class="formula-list">
+      <div class="formula-card" for="{{formulaList}}">
+        <text class="formula-title">{{$item.title}}</text>
+        <text class="formula-content">{{$item.content}}</text>
+      </div>
+      <div class="bottom-spacer">
+        <text class="spacer-text"></text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    width: 192px;
+    height: 490px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-bar {
+    width: 171px;
+    height: 18px;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title-text {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .formula-list {
+    width: 177px;
+    height: 430px;
+    margin-top: 2px;
+    overflow: scroll;
+  }
+
+  .formula-card {
+    width: 177px;
+    background-color: #1a1a1a;
+    border-radius: 7px;
+    margin-top: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .formula-title {
+    color: #9370db;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .formula-content {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .bottom-spacer {
+    width: 177px;
+    height: 40px;
+  }
+
+  .spacer-text {
+    font-size: 1px;
+  }
+</style>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      formulaList: [
+        { title: '二次方程求根', content: 'x = (-b ± √(b²-4ac)) / 2a' },
+        { title: '判别式', content: 'Δ = b² - 4ac' },
+        { title: '韦达定理', content: 'x₁+x₂ = -b/a, x₁·x₂ = c/a' },
+        { title: '等差数列通项', content: 'aₙ = a₁ + (n-1)d' },
+        { title: '等差数列求和', content: 'Sₙ = n(a₁+aₙ)/2 = na₁+n(n-1)d/2' },
+        { title: '等比数列通项', content: 'aₙ = a₁·q^(n-1)' },
+        { title: '等比数列求和', content: 'Sₙ = a₁(1-qⁿ)/(1-q)' },
+        { title: '三角恒等式', content: 'sin²θ+cos²θ=1' },
+        { title: '二倍角公式', content: 'sin2θ=2sinθcosθ, cos2θ=cos²θ-sin²θ' },
+        { title: '和差化积', content: 'sinA+sinB=2sin((A+B)/2)cos((A-B)/2)' },
+        { title: '余弦定理', content: 'c²=a²+b²-2ab·cosC' },
+        { title: '正弦定理', content: 'a/sinA = b/sinB = c/sinC = 2R' },
+        { title: '三角形面积', content: 'S = (1/2)ab·sinC = (1/2)底·高' },
+        { title: '对数换底公式', content: 'logₐb = lnb/lna' },
+        { title: '对数运算法则', content: 'logₐ(MN)=logₐM+logₐN' },
+        { title: '指数运算法则', content: 'a^m·a^n=a^(m+n), (a^m)^n=a^(mn)' },
+        { title: '组合数公式', content: 'C(n,m) = n!/(m!(n-m)!)' },
+        { title: '排列数公式', content: 'A(n,m) = n!/(n-m)!' },
+        { title: '二项式定理', content: '(a+b)ⁿ = ΣC(n,k)a^(n-k)b^k' },
+        { title: '基本不等式', content: 'a+b ≥ 2√(ab) (a,b>0)' },
+        { title: '柯西不等式', content: '(a²+b²)(c²+d²) ≥ (ac+bd)²' },
+        { title: '点到直线距离', content: 'd = |Ax₀+By₀+C|/√(A²+B²)' },
+        { title: '两点间距离', content: '|AB| = √((x₂-x₁)²+(y₂-y₁)²)' },
+        { title: '中点坐标', content: '((x₁+x₂)/2, (y₁+y₂)/2)' },
+        { title: '圆的方程', content: '(x-a)²+(y-b)²=r²' },
+        { title: '椭圆标准方程', content: 'x²/a² + y²/b² = 1 (a>b)' },
+        { title: '双曲线标准方程', content: 'x²/a² - y²/b² = 1' },
+        { title: '抛物线标准方程', content: 'y² = 2px (p>0)' },
+        { title: '导数定义', content: 'f\'(x) = lim(Δx→0)[f(x+Δx)-f(x)]/Δx' },
+        { title: '定积分', content: '∫[a,b]f(x)dx = F(b)-F(a)' },
+        { title: '向量点乘', content: 'a·b = |a||b|cosθ = x₁x₂+y₁y₂' },
+        { title: '向量叉乘模', content: '|a×b| = |a||b|sinθ' },
+        { title: '直线斜截式', content: 'y = kx + b' },
+        { title: '直线点斜式', content: 'y-y₀ = k(x-x₀)' },
+        { title: '等差中项', content: '2b = a + c' },
+        { title: '等比中项', content: 'b² = a·c' },
+        { title: '方差公式', content: 's² = (1/n)Σ(xᵢ-x̄)²' },
+        { title: '标准差', content: 's = √s²' },
+        { title: '期望性质', content: 'E(aX+b) = aE(X)+b' },
+        { title: '方差性质', content: 'D(aX+b) = a²D(X)' }
+      ]
+    },
+
+    onBackPress() {
+      router.back()
+      return true
+    }
+  }
+</script>
