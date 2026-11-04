@@ -1,57 +1,62 @@
 <template>
   <div class="page">
     <div class="header-bar">
-      <text class="header-title">设置</text>
+      <text class="header-title">{{L.title}}</text>
     </div>
 
     <list class="settings-list">
+      <list-item class="setting-item" onclick="toggleLanguage">
+        <text class="setting-label">{{L.language}}</text>
+        <text class="setting-value">{{langSetting === 'auto' ? L.langAuto : LANG_NAMES[langSetting]}}</text>
+      </list-item>
+
       <list-item class="setting-item" onclick="toggleVibration">
-        <text class="setting-label">按键震动反馈</text>
+        <text class="setting-label">{{L.vibration}}</text>
         <image class="toggle-img" src="{{vibrationOn ? '/Common/toggle_on.png' : '/Common/toggle_off.png'}}"></image>
       </list-item>
 
       <list-item class="setting-item" onclick="toggleAutoCalc">
-        <text class="setting-label">化学方程式自动计算</text>
+        <text class="setting-label">{{L.autoCalc}}</text>
         <image class="toggle-img" src="{{autoCalcOn ? '/Common/toggle_on.png' : '/Common/toggle_off.png'}}"></image>
       </list-item>
 
       <list-item class="desc-item">
         <div class="setting-desc">
-          <text class="desc-text">开启后输入化学方程式将自动运算结果，</text>
-          <text class="desc-text">关闭后仅进行配平。</text>
+          <text class="desc-text">{{L.autoCalcDesc1}}</text>
+          <text class="desc-text">{{L.autoCalcDesc2}}</text>
         </div>
       </list-item>
 
       <list-item class="setting-item" onclick="toggleSmoothCurve">
-        <text class="setting-label">图像平滑曲线</text>
+        <text class="setting-label">{{L.smooth}}</text>
         <image class="toggle-img" src="{{smoothOn ? '/Common/toggle_on.png' : '/Common/toggle_off.png'}}"></image>
       </list-item>
 
       <list-item class="desc-item">
         <div class="setting-desc">
-          <text class="desc-text">开启后函数图像采样点增至150个，</text>
-          <text class="desc-text">曲线更平滑；关闭则使用默认采样。</text>
+          <text class="desc-text">{{L.smoothDesc1}}</text>
+          <text class="desc-text">{{L.smoothDesc2}}</text>
         </div>
       </list-item>
 
       <list-item class="setting-item" onclick="toggleBgRun">
-        <text class="setting-label">应用后台运行</text>
+        <text class="setting-label">{{L.bgRun}}</text>
         <image class="toggle-img" src="{{bgOn ? '/Common/toggle_on.png' : '/Common/toggle_off.png'}}"></image>
       </list-item>
 
       <list-item class="desc-item">
         <div class="setting-desc">
-          <text class="desc-text">开启后应用退到后台仍可继续运行，</text>
-          <text class="desc-text">关闭后回到表盘将停止运行。</text>
+          <text class="desc-text">{{L.bgRunDesc1}}</text>
+          <text class="desc-text">{{L.bgRunDesc2}}</text>
         </div>
       </list-item>
 
       <list-item class="setting-item" onclick="openReward">
-        <text class="setting-label">赞赏我们</text>
+        <text class="setting-label">{{L.reward}}</text>
       </list-item>
 
       <list-item class="setting-item" onclick="openAbout">
-        <text class="setting-label">关于应用</text>
+        <text class="setting-label">{{L.about}}</text>
       </list-item>
 
       <list-item class="bottom-spacer">
@@ -132,6 +137,12 @@
     font-weight: 800;
   }
 
+  .setting-value {
+    color: #aaaaaa;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
   .toggle-img {
     width: 90px;
     height: 45px;
@@ -158,18 +169,23 @@
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
   import prompt from '@system.prompt'
+  import i18n from '../../i18n/index.js'
 
   var KEY_VIBRATION = 'setting_vibration'
   var KEY_AUTOCALC = 'setting_autocalc'
   var KEY_SMOOTH = 'setting_smooth_curve'
   var KEY_BG = 'bg_running_v1'
+  var LANGS = ['auto', 'zh', 'en']
 
   export default {
     private: {
+      L: i18n.page('settings'),
       vibrationOn: true,
       autoCalcOn: true,
       smoothOn: true,
-      bgOn: false
+      bgOn: false,
+      langSetting: 'auto',
+      LANG_NAMES: { zh: '中文', en: 'English' }
     },
 
     onBackPress() {
@@ -178,7 +194,12 @@
     },
 
     onInit() {
+      this.L = i18n.page('settings')
       var self = this
+      i18n.load(function() {
+        self.langSetting = i18n.getSetting()
+        self.L = i18n.page('settings')
+      })
       storage.get({
         key: KEY_VIBRATION,
         success: function(data) {
@@ -236,6 +257,14 @@
       }
     },
 
+    toggleLanguage() {
+      this.doVibrate()
+      var next = LANGS[(LANGS.indexOf(this.langSetting) + 1) % LANGS.length]
+      i18n.setSetting(next)
+      this.langSetting = next
+      this.L = i18n.page('settings')
+    },
+
     toggleVibration() {
       this.vibrationOn = !this.vibrationOn
       this.doVibrate()
@@ -275,7 +304,7 @@
           this.$app.$def.setBgRunning(this.bgOn)
         }
       } catch (e) {}
-      prompt.showToast({ message: this.bgOn ? '后台运行已开启' : '后台运行已关闭' })
+      prompt.showToast({ message: this.bgOn ? this.L.bgOnToast : this.L.bgOffToast })
     },
 
     openReward() {

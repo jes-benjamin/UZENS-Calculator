@@ -26,6 +26,9 @@
     },
     {
       "name": "system.geolocation"
+    },
+    {
+      "name": "system.configuration"
     }
   ],
   "permissions": [
