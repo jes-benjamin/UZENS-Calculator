@@ -1,6 +1,6 @@
 {
   "package": "com.uzens.calculator",
-  "name": "矩阵计算器",
+  "name": "${message.appName}",
   "versionName": "5.2.1",
   "versionCode": 521,
   "minPlatformVersion": 1200,
