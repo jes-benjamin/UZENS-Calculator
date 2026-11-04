@@ -24,7 +24,7 @@
         <div class="key key-num" onclick="appendToken('1')"><text class="num-text">1</text></div>
         <div class="key key-num" onclick="appendToken('2')"><text class="num-text">2</text></div>
         <div class="key key-num" onclick="appendToken('3')"><text class="num-text">3</text></div>
-        <div class="key key-equal" onclick="openResult"><text class="num-dark">绘制</text></div>
+        <div class="key key-equal" onclick="openResult"><text class="num-dark">{{L.draw}}</text></div>
       </div>
       <div class="key-row">
         <div class="key key-num" onclick="appendToken('0')"><text class="num-text">0</text></div>
@@ -55,7 +55,7 @@
         <div class="key key-op" onclick="appendToken('/')"><text class="num-text">&#247;</text></div>
       </div>
       <div class="key-row">
-        <div class="key-solve" onclick="openResult"><text class="solve-text">绘制图像</text></div>
+        <div class="key-solve" onclick="openResult"><text class="solve-text">{{L.drawGraph}}</text></div>
       </div>
     </div>
 
@@ -77,7 +77,7 @@
         <div class="key key-sci" onclick="setPreset('e^x')"><text class="func-text">e^x</text></div>
         <div class="key key-sci" onclick="setPreset('x^2')"><text class="func-text">x&#178;</text></div>
         <div class="key key-sci" onclick="setPreset('x^3')"><text class="func-text">x&#179;</text></div>
-        <div class="key key-equal" onclick="openResult"><text class="num-dark">绘制</text></div>
+        <div class="key key-equal" onclick="openResult"><text class="num-dark">{{L.draw}}</text></div>
       </div>
       <div class="key-row">
         <div class="key key-sci" onclick="setPreset('sqrt')"><text class="func-text">&#8730;x</text></div>
@@ -263,10 +263,10 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var GRAPH_EXPR_KEY = 'graph_expr_v2'
 
-  var LABELS = ['数字输入', '运算符号', '函数预设']
   var TOTAL = 3
 
   var presets = {
@@ -285,6 +285,7 @@
 
   export default {
     private: {
+      L: i18n.page('graph'),
       funcExpr: '',
       keyPage: 0,
       vibrationOn: true
@@ -292,14 +293,15 @@
 
     computed: {
       displayExpression() {
-        return this.funcExpr || '输入函数如: x^2+3x'
+        return this.funcExpr || this.L.placeholder
       },
       currentLabel() {
-        return LABELS[this.keyPage]
+        return this.L.labels[this.keyPage]
       }
     },
 
     onInit() {
+      this.L = i18n.from(this).page('graph')
       var self = this
       storage.get({
         key: 'setting_vibration',

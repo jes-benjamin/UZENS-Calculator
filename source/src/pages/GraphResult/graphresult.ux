@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div class="title-bar">
-      <text class="title-text">函数图像</text>
+      <text class="title-text">{{L.title}}</text>
     </div>
 
     <div class="expr-box">
@@ -20,8 +20,8 @@
       <div class="curve-dot" for="{{curveDots}}" style="left:{{$item.l}}px;top:{{$item.t}}px;background-color:{{$item.c}}"></div>
     </div>
 
-    <text class="tip-text" if="{{hasError}}">表达式无效，请返回修改</text>
-    <text class="tip-text" if="{{curveDots.length === 0 && !hasError}}">无法绘制该函数</text>
+    <text class="tip-text" if="{{hasError}}">{{L.invalid}}</text>
+    <text class="tip-text" if="{{curveDots.length === 0 && !hasError}}">{{L.cannotDraw}}</text>
   </div>
 </template>
 
@@ -136,11 +136,13 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var GRAPH_EXPR_KEY = 'graph_expr_v2'
 
   export default {
     private: {
+      L: i18n.page('graphresult'),
       funcExpr: '0',
       hasError: false,
       gridH: [],
@@ -151,6 +153,7 @@
     },
 
     onInit() {
+      this.L = i18n.from(this).page('graphresult')
       var self = this
       storage.get({
         key: 'setting_vibration',

@@ -1,16 +1,16 @@
 <template>
   <div class="page">
     <div class="header-bar">
-      <text class="header-title">历史记录</text>
+      <text class="header-title">{{L.title}}</text>
     </div>
 
     <div class="clear-btn" onclick="showConfirmDialog">
-      <text class="clear-btn-text">清空历史</text>
+      <text class="clear-btn-text">{{L.clearHistory}}</text>
     </div>
 
     <list class="history-list">
       <list-item class="history-card" for="{{historyList}}" style="height: {{$item.cardH}}px" onclick="useHistory($item)">
-        <text class="history-type">{{$item.type}}</text>
+        <text class="history-type">{{$item.typeText}}</text>
         <text class="history-expr" style="height: {{$item.exprH}}px">{{$item.expr}}</text>
         <text class="history-result" style="height: {{$item.resH}}px">{{$item.result}}</text>
       </list-item>
@@ -18,7 +18,7 @@
         <text class="spacer-text"></text>
       </list-item>
       <list-item class="empty-cell" if="{{historyList.length === 0}}">
-        <text class="empty-text">暂无历史记录</text>
+        <text class="empty-text">{{L.empty}}</text>
       </list-item>
     </list>
 
@@ -27,7 +27,7 @@
       <div class="confirm-top-btn" onclick="cancelDelete">
         <text class="cancel-icon">✕</text>
       </div>
-      <text class="confirm-text">是否确定删除？</text>
+      <text class="confirm-text">{{L.confirmDelete}}</text>
       <div class="confirm-bottom-btn" onclick="confirmDelete">
         <text class="ok-icon">✓</text>
       </div>
@@ -203,11 +203,13 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('history'),
       historyList: [],
       showConfirm: false,
       vibrationOn: true
@@ -223,6 +225,7 @@
     },
 
     onInit() {
+      this.L = i18n.from(this).page('history')
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -264,6 +267,7 @@
 
     decorateList(list) {
       for (var i = 0; i < list.length; i++) {
+        list[i].typeText = this.L.types[list[i].type] || list[i].type
         var eLines = this.calcLines(list[i].expr || '', 26, 402, 4)
         var rLines = this.calcLines(list[i].result || '', 32, 402, 5)
         list[i].exprH = eLines * 32

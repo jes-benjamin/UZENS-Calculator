@@ -1,14 +1,14 @@
 <template>
   <div class="page">
-    <text class="title-text">随机数生成</text>
+    <text class="title-text">{{L.title}}</text>
 
     <div class="input-row">
       <div class="field-btn {{activeField==='min'?'field-active':''}}" onclick="selectField('min')">
-        <text class="field-label">最小值</text>
+        <text class="field-label">{{L.min}}</text>
         <text class="field-value">{{unlimited?'∞':minText}}</text>
       </div>
       <div class="field-btn {{activeField==='max'?'field-active':''}}" onclick="selectField('max')">
-        <text class="field-label">最大值</text>
+        <text class="field-label">{{L.max}}</text>
         <text class="field-value">{{unlimited?'∞':maxText}}</text>
       </div>
     </div>
@@ -40,8 +40,8 @@
       <div class="key-row">
         <div class="key key-num" onclick="pressKey('0')"><text class="key-text">0</text></div>
         <div class="key key-func" onclick="pressKey('.')"><text class="key-text">.</text></div>
-        <div class="key key-toggle {{unlimited?'toggle-on':''}}" onclick="toggleUnlimited"><text class="key-small">无限</text></div>
-        <div class="key key-gen" onclick="generate"><text class="key-small">生成</text></div>
+        <div class="key key-toggle {{unlimited?'toggle-on':''}}" onclick="toggleUnlimited"><text class="key-small">{{L.unlimited}}</text></div>
+        <div class="key key-gen" onclick="generate"><text class="key-small">{{L.generate}}</text></div>
       </div>
     </div>
   </div>
@@ -209,19 +209,23 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   export default {
     private: {
+      L: i18n.page('random'),
       minText: '0',
       maxText: '100',
       activeField: 'min',
       unlimited: false,
       resultText: '—',
-      resultDesc: '点击生成随机数',
+      resultDesc: '',
       vibrationOn: true
     },
 
     onInit() {
+      this.L = i18n.from(this).page('random')
+      this.resultDesc = this.L.tapToGenerate
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -320,11 +324,11 @@
       var result, desc
       if (minIsInt && maxIsInt) {
         result = Math.floor(Math.random() * (hi - lo + 1)) + lo
-        desc = '整数 [' + lo + ', ' + hi + ']'
+        desc = this.L.integer + ' [' + lo + ', ' + hi + ']'
       } else {
         result = Math.random() * (hi - lo) + lo
         result = Math.round(result * 100000) / 100000
-        desc = '浮点 [' + lo + ', ' + hi + ']'
+        desc = this.L.float + ' [' + lo + ', ' + hi + ']'
       }
 
       this.resultText = String(result)

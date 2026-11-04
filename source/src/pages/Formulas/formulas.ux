@@ -3,9 +3,9 @@
     <!-- 公式类型选择 -->
     <div class="view" if="{{!showList}}">
       <div class="back-btn" onclick="goBack">
-        <text class="back-text">‹ 返回</text>
+        <text class="back-text">‹ {{L.back}}</text>
       </div>
-      <text class="page-title">公式大全</text>
+      <text class="page-title">{{L.title}}</text>
       <list class="cat-list">
         <list-item class="cat-item" for="{{catNames}}" onclick="selectCat($item)">
           <text class="cat-text">{{$item}}</text>
@@ -19,7 +19,7 @@
     <!-- 类别内公式列表 -->
     <div class="view" if="{{showList}}">
       <div class="back-btn" onclick="backToCats">
-        <text class="back-text">‹ 类型</text>
+        <text class="back-text">‹ {{L.categories}}</text>
       </div>
       <text class="page-title">{{currentName}}</text>
       <list class="formula-list">
@@ -158,8 +158,10 @@
 
 <script>
   import router from '@system.router'
+  import i18n from '../../i18n/index.js'
+  import FORMULAS_EN from '../../i18n/formulas_en.js'
 
-  var CATEGORIES = [
+  var CATEGORIES_ZH = [
     {
       name: '乘法公式与因式分解',
       list: [
@@ -456,8 +458,11 @@
     }
   ]
 
+  var CATEGORIES = CATEGORIES_ZH
+
   export default {
     private: {
+      L: i18n.page('formulas'),
       showList: false,
       catNames: [],
       currentName: '',
@@ -465,6 +470,8 @@
     },
 
     onInit() {
+      this.L = i18n.from(this).page('formulas')
+      CATEGORIES = i18n.from(this).lang() === 'en' ? FORMULAS_EN : CATEGORIES_ZH
       var names = []
       for (var i = 0; i < CATEGORIES.length; i++) {
         names.push(CATEGORIES[i].name)

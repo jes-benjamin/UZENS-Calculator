@@ -1,12 +1,19 @@
 <script>
   import geolocation from '@system.geolocation'
   import storage from '@system.storage'
+  import i18n from './i18n/index.js'
 
   var BG_KEY = 'bg_running_v1'
   var bgOn = false
 
   export default {
-    onCreate() {},
+    onCreate() {
+      i18n.load()
+    },
+
+    getI18n() {
+      return i18n
+    },
 
     onDestroy() {
       stopBackground()

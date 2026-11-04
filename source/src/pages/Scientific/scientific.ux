@@ -42,8 +42,8 @@
         <div class="key key-soft" onclick="pressParen(')')"><text class="num-text">)</text></div>
       </div>
       <div class="key-row">
-        <div class="key key-soft" onclick="clearAll"><text class="func-text">清空</text></div>
-        <div class="key key-soft" onclick="deleteLast"><text class="func-text">删除</text></div>
+        <div class="key key-soft" onclick="clearAll"><text class="func-text">{{L.clear}}</text></div>
+        <div class="key key-soft" onclick="deleteLast"><text class="func-text">{{L.delete}}</text></div>
         <div class="key key-soft" onclick="pressNumber('00')"><text class="num-text">00</text></div>
         <div class="key key-equal" onclick="calculate"><text class="num-dark">=</text></div>
       </div>
@@ -235,13 +235,14 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
-  const LABELS = ['数字输入', '运算功能', '科学函数']
   const TOTAL = 3
   const HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('scientific'),
       expression: '',
       result: '0',
       justSolved: false,
@@ -255,11 +256,12 @@
         return this.expression || '0'
       },
       currentLabel() {
-        return LABELS[this.keyPage]
+        return this.L.labels[this.keyPage]
       }
     },
 
     onInit() {
+      this.L = i18n.from(this).page('scientific')
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -314,7 +316,7 @@
 
     pressNumber(num) {
       this.doVibrate()
-      if (this.justSolved || this.result === '错误') {
+      if (this.justSolved || this.result === this.L.error) {
         this.expression = ''
         this.result = '0'
         this.justSolved = false
@@ -325,7 +327,7 @@
 
     pressDot() {
       this.doVibrate()
-      if (this.justSolved || this.result === '错误') {
+      if (this.justSolved || this.result === this.L.error) {
         this.expression = '0.'
         this.justSolved = false
       } else {
@@ -359,7 +361,7 @@
 
     pressParen(paren) {
       this.doVibrate()
-      if (this.justSolved || this.result === '错误') {
+      if (this.justSolved || this.result === this.L.error) {
         this.expression = ''
         this.justSolved = false
       }
@@ -369,7 +371,7 @@
 
     pressFunction(name) {
       this.doVibrate()
-      if (this.justSolved || this.result === '错误') {
+      if (this.justSolved || this.result === this.L.error) {
         this.expression = ''
         this.justSolved = false
       }
@@ -379,7 +381,7 @@
 
     pressConstant(name) {
       this.doVibrate()
-      if (this.justSolved || this.result === '错误') {
+      if (this.justSolved || this.result === this.L.error) {
         this.expression = ''
         this.justSolved = false
       }
@@ -437,7 +439,7 @@
         var fn = new Function('factorial', 'log10', 'return ' + expr)
         var value = fn(factorial, log10)
         if (isNaN(value) || !isFinite(value)) {
-          this.result = '错误'
+          this.result = this.L.error
         } else {
           this.result = this.formatResult(value)
           this.addHistory(original, this.result)
@@ -445,7 +447,7 @@
         this.expression = ''
         this.justSolved = true
       } catch (e) {
-        this.result = '错误'
+        this.result = this.L.error
         this.expression = ''
         this.justSolved = true
       }

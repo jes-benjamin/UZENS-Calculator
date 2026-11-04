@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <text class="title-text">货币换算</text>
+    <text class="title-text">{{L.title}}</text>
 
     <div class="currency-row">
       <div class="currency-btn" onclick="nextFrom"><text class="currency-text">{{fromCurrency}}</text></div>
@@ -218,6 +218,7 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var HISTORY_KEY = 'calc_history_v2'
 
@@ -232,6 +233,7 @@
 
   export default {
     private: {
+      L: i18n.page('currency'),
       fromIndex: 0,
       toIndex: 1,
       inputValue: '',
@@ -239,6 +241,7 @@
     },
 
     onInit() {
+      this.L = i18n.from(this).page('currency')
       var self = this
       storage.get({
         key: 'setting_vibration',

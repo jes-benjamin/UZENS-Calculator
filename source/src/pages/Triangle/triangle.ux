@@ -4,7 +4,7 @@
     <div class="input-mode" if="{{!showResult}}">
       <div class="header-bar">
         <div class="back-btn" onclick="goBack"><text class="back-text">‹</text></div>
-        <text class="header-title">三角几何</text>
+        <text class="header-title">{{L.title}}</text>
       </div>
 
       <div class="side-row">
@@ -39,12 +39,12 @@
           <div class="key key-num" onclick="pressNum('1')"><text class="num-text">1</text></div>
           <div class="key key-num" onclick="pressNum('2')"><text class="num-text">2</text></div>
           <div class="key key-num" onclick="pressNum('3')"><text class="num-text">3</text></div>
-          <div class="key key-equal" onclick="drawTriangle"><text class="num-dark">绘制</text></div>
+          <div class="key key-equal" onclick="drawTriangle"><text class="num-dark">{{L.draw}}</text></div>
         </div>
         <div class="key-row">
           <div class="key key-num" onclick="pressNum('.')"><text class="num-text">.</text></div>
           <div class="key key-num" onclick="pressNum('0')"><text class="num-text">0</text></div>
-          <div class="key key-solve" onclick="drawTriangle"><text class="solve-text">绘制三角形</text></div>
+          <div class="key key-solve" onclick="drawTriangle"><text class="solve-text">{{L.drawTriangle}}</text></div>
         </div>
       </div>
     </div>
@@ -53,7 +53,7 @@
     <div class="result-mode" if="{{showResult}}">
       <div class="result-header">
         <div class="back-btn" onclick="backToInput"><text class="back-text">‹</text></div>
-        <text class="header-title">三角形</text>
+        <text class="header-title">{{L.triangle}}</text>
       </div>
 
       <list class="result-list">
@@ -377,11 +377,13 @@
   import router from '@system.router'
   import vibrator from '@system.vibrator'
   import storage from '@system.storage'
+  import i18n from '../../i18n/index.js'
 
   var HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('triangle'),
       showResult: false,
       activeSide: 'a',
       sideA: '',
@@ -392,6 +394,10 @@
       vB: { l: 0, t: 0 },
       vC: { l: 0, t: 0 },
       angles: []
+    },
+
+    onInit() {
+      this.L = i18n.from(this).page('triangle')
     },
 
     onBackPress() {
@@ -464,11 +470,11 @@
       var b = parseFloat(this.sideB)
       var c = parseFloat(this.sideC)
       if (isNaN(a) || isNaN(b) || isNaN(c) || a <= 0 || b <= 0 || c <= 0) {
-        this.showToast('请输入三边长度')
+        this.showToast(this.L.enterSides)
         return
       }
       if (a + b <= c || a + c <= b || b + c <= a) {
-        this.showToast('三边不能构成三角形')
+        this.showToast(this.L.notTriangle)
         return
       }
 
