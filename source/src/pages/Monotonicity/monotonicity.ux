@@ -30,7 +30,7 @@
         <div class="key key-num" onclick="pressChar('.')"><text class="num-text">.</text></div>
         <div class="key key-num" onclick="pressChar('0')"><text class="num-text">0</text></div>
         <div class="key key-num" onclick="pressChar('x')"><text class="num-text">x</text></div>
-        <div class="key-solve" onclick="solve"><text class="solve-text">计算</text></div>
+        <div class="key-solve" onclick="solve"><text class="solve-text">{{L.calc}}</text></div>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
         <div class="key key-soft" onclick="clearAll"><text class="func-text">AC</text></div>
       </div>
       <div class="key-row">
-        <div class="key-solve" onclick="solve"><text class="solve-text">计算</text></div>
+        <div class="key-solve" onclick="solve"><text class="solve-text">{{L.calc}}</text></div>
       </div>
     </div>
 
@@ -81,7 +81,7 @@
         <div class="key key-num" onclick="pressChar('e')"><text class="num-text">e</text></div>
         <div class="key key-num" onclick="pressChar('x')"><text class="num-text">x</text></div>
         <div class="key key-equal" onclick="pressChar('=')"><text class="num-dark">=</text></div>
-        <div class="key key-op" onclick="solve"><text class="num-text">计算</text></div>
+        <div class="key key-op" onclick="solve"><text class="num-text">{{L.calc}}</text></div>
       </div>
     </div>
       <div class="nav-side" onclick="nextPage"><text class="nav-side-text">›</text></div>
@@ -262,15 +262,16 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
-  var LABELS = ['数字输入', '运算符号', '函数符号']
   var TOTAL = 3
   var HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('monotonicity'),
       expression: '',
-      result: '等待输入',
+      result: '',
       keyPage: 0,
       vibrationOn: true,
       xValue: 0
@@ -278,14 +279,16 @@
 
     computed: {
       displayExpression() {
-        return this.expression || '输入函数如: x^2-4x+3'
+        return this.expression || this.L.placeholder
       },
       currentLabel() {
-        return LABELS[this.keyPage]
+        return this.L.labels[this.keyPage]
       }
     },
 
     onInit() {
+      this.L = i18n.page('monotonicity')
+      this.result = this.L.waiting
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -319,7 +322,7 @@
     clearAll() {
       this.doVibrate()
       this.expression = ''
-      this.result = '等待输入'
+      this.result = this.L.waiting
     },
 
     deleteLast() {
@@ -328,15 +331,15 @@
         this.expression = this.expression.substring(0, this.expression.length - 1)
       }
       if (this.expression.length === 0) {
-        this.result = '等待输入'
+        this.result = this.L.waiting
       }
     },
 
     pressChar(ch) {
       this.doVibrate()
-      if (this.result !== '等待输入' && this.result !== '请输入表达式') {
+      if (this.result !== this.L.waiting && this.result !== this.L.enterExpr) {
         this.expression = ''
-        this.result = '等待输入'
+        this.result = this.L.waiting
       }
       if (ch === 'sin' || ch === 'cos' || ch === 'tan' || ch === 'log' || ch === 'ln' || ch === 'lg') {
         this.expression += ch + '('
@@ -355,7 +358,7 @@
       this.doVibrate()
       var raw = this.expression.replace(/\s/g, '')
       if (raw.length === 0) {
-        this.result = '请输入表达式'
+        this.result = this.L.enterExpr
         return
       }
 
@@ -367,7 +370,7 @@
         }
         this.addHistory(this.expression, this.result)
       } catch (e) {
-        this.result = '无法解析'
+        this.result = this.L.cannotParse
       }
     },
 
@@ -405,7 +408,7 @@
       }
 
       if (nonZero.length === 0) {
-        return '函数为常数'
+        return this.L.constant
       }
 
       var maxDeg = 0
@@ -417,7 +420,7 @@
       var roots = []
       if (maxDeg === 0) {
         var c = deriv.const || 0
-        return c > 0 ? '(-\u221e,+\u221e)递增' : '(-\u221e,+\u221e)递减'
+        return c > 0 ? '(-\u221e,+\u221e)' + this.L.inc : '(-\u221e,+\u221e)' + this.L.dec
       } else if (maxDeg === 1) {
         var a = deriv.x1 || 0
         var b = deriv.const || 0
@@ -439,8 +442,8 @@
         } else if (Math.abs(disc) <= eps) {
           roots.push(-b2 / (2 * a2))
         } else {
-          if (a2 > 0) return '(-\u221e,+\u221e)递增'
-          else return '(-\u221e,+\u221e)递减'
+          if (a2 > 0) return '(-\u221e,+\u221e)' + this.L.inc
+          else return '(-\u221e,+\u221e)' + this.L.dec
         }
       } else {
         return this.sampleMonotonicity(expr)
@@ -465,9 +468,9 @@
         var endLabel = (i === roots.length) ? '+\u221e' : this.formatNum(roots[i])
 
         if (isInc) {
-          parts.push('(' + startLabel + ',' + endLabel + ')递增')
+          parts.push('(' + startLabel + ',' + endLabel + ')' + this.L.inc)
         } else {
-          parts.push('(' + startLabel + ',' + endLabel + ')递减')
+          parts.push('(' + startLabel + ',' + endLabel + ')' + this.L.dec)
         }
 
         startLabel = endLabel
@@ -529,7 +532,7 @@
       var first = 0
       while (first < samples.length && samples[first].s === 0) first++
       if (first === samples.length) {
-        return '非单调函数'
+        return this.L.notMonotonic
       }
 
       var prevS = samples[first].s
@@ -561,7 +564,7 @@
       }
 
       if (transitions.length === 0) {
-        return prevS > 0 ? '(-∞,+∞)递增' : '(-∞,+∞)递减'
+        return prevS > 0 ? '(-∞,+∞)' + this.L.inc : '(-∞,+∞)' + this.L.dec
       }
 
       var bounds = [-Infinity].concat(transitions).concat([Infinity])
@@ -576,7 +579,7 @@
         var d = deriv(mid)
         var startL = t === 0 ? '-∞' : this.formatNum(loB)
         var endL = t === bounds.length - 2 ? '+∞' : this.formatNum(hiB)
-        parts.push('(' + startL + ',' + endL + ')' + (d > 0 ? '递增' : '递减'))
+        parts.push('(' + startL + ',' + endL + ')' + (d > 0 ? this.L.inc : this.L.dec))
       }
 
       return parts.join(',')

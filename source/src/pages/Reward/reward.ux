@@ -1,14 +1,14 @@
 <template>
   <div class="page">
     <div class="header-bar">
-      <text class="header-title">赞赏我们</text>
+      <text class="header-title">{{L.title}}</text>
     </div>
 
     <div class="qrcode-box">
       <image class="qrcode-img" src="/Common/reward_qrcode.jpg"></image>
     </div>
 
-    <text class="hint-text">扫码赞赏，支持开发者</text>
+    <text class="hint-text">{{L.hint}}</text>
   </div>
 </template>
 
@@ -67,8 +67,17 @@
 
 <script>
   import router from '@system.router'
+  import i18n from '../../i18n/index.js'
 
   export default {
+    private: {
+      L: i18n.page('reward')
+    },
+
+    onInit() {
+      this.L = i18n.page('reward')
+    },
+
     onBackPress() {
       router.back()
       return true

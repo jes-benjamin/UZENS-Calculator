@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div class="title-bar">
-      <text class="title-text">单位换算</text>
+      <text class="title-text">{{L.title}}</text>
     </div>
 
     <div class="cat-nav">
@@ -279,90 +279,93 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var HISTORY_KEY = 'calc_history_v2'
 
   var categories = [
     {
-      name: '长度',
+      id: 'length',
       units: [
-        { name: '毫米', rate: 0.001 },
-        { name: '厘米', rate: 0.01 },
-        { name: '米', rate: 1 },
-        { name: '千米', rate: 1000 },
-        { name: '英寸', rate: 0.0254 },
-        { name: '英尺', rate: 0.3048 },
-        { name: '英里', rate: 1609.344 }
+        { id: 'mm', rate: 0.001 },
+        { id: 'cm', rate: 0.01 },
+        { id: 'm', rate: 1 },
+        { id: 'km', rate: 1000 },
+        { id: 'in', rate: 0.0254 },
+        { id: 'ft', rate: 0.3048 },
+        { id: 'mi', rate: 1609.344 }
       ]
     },
     {
-      name: '重量',
+      id: 'weight',
       units: [
-        { name: '毫克', rate: 0.000001 },
-        { name: '克', rate: 0.001 },
-        { name: '千克', rate: 1 },
-        { name: '吨', rate: 1000 },
-        { name: '盎司', rate: 0.0283495 },
-        { name: '磅', rate: 0.45359237 }
+        { id: 'mg', rate: 0.000001 },
+        { id: 'g', rate: 0.001 },
+        { id: 'kg', rate: 1 },
+        { id: 't', rate: 1000 },
+        { id: 'oz', rate: 0.0283495 },
+        { id: 'lb', rate: 0.45359237 }
       ]
     },
     {
-      name: '温度',
+      id: 'temp',
       units: [
-        { name: '摄氏度', key: 'C' },
-        { name: '华氏度', key: 'F' },
-        { name: '开尔文', key: 'K' }
+        { id: 'C', key: 'C' },
+        { id: 'F', key: 'F' },
+        { id: 'K', key: 'K' }
       ]
     },
     {
-      name: '面积',
+      id: 'area',
       units: [
-        { name: '平方厘米', rate: 0.0001 },
-        { name: '平方米', rate: 1 },
-        { name: '平方千米', rate: 1000000 },
-        { name: '平方英尺', rate: 0.092903 },
-        { name: '亩', rate: 666.6667 },
-        { name: '公顷', rate: 10000 }
+        { id: 'cm2', rate: 0.0001 },
+        { id: 'm2', rate: 1 },
+        { id: 'km2', rate: 1000000 },
+        { id: 'ft2', rate: 0.092903 },
+        { id: 'mu', rate: 666.6667 },
+        { id: 'ha', rate: 10000 }
       ]
     },
     {
-      name: '体积',
+      id: 'volume',
       units: [
-        { name: '毫升', rate: 0.001 },
-        { name: '升', rate: 1 },
-        { name: '立方米', rate: 1000 },
-        { name: '茶匙', rate: 0.00492892 },
-        { name: '杯', rate: 0.236588 },
-        { name: '加仑', rate: 3.78541 }
+        { id: 'ml', rate: 0.001 },
+        { id: 'l', rate: 1 },
+        { id: 'm3', rate: 1000 },
+        { id: 'tsp', rate: 0.00492892 },
+        { id: 'cup', rate: 0.236588 },
+        { id: 'gal', rate: 3.78541 }
       ]
     },
     {
-      name: '数据大小',
+      id: 'data',
       units: [
-        { name: 'bit', rate: 0.125 },
-        { name: 'B', rate: 1 },
-        { name: 'KB', rate: 1024 },
-        { name: 'MB', rate: 1048576 },
-        { name: 'GB', rate: 1073741824 },
-        { name: 'TB', rate: 1099511627776 }
+        { id: 'bit', rate: 0.125 },
+        { id: 'B', rate: 1 },
+        { id: 'KB', rate: 1024 },
+        { id: 'MB', rate: 1048576 },
+        { id: 'GB', rate: 1073741824 },
+        { id: 'TB', rate: 1099511627776 }
       ]
     }
   ]
 
   export default {
     private: {
+      L: i18n.page('unit'),
       catIndex: 0,
       fromIndex: 2,
       toIndex: 5,
       inputValue: '1',
       outputValue: '3.28084',
-      catName: '长度',
-      fromUnit: '米',
-      toUnit: '英尺',
+      catName: '',
+      fromUnit: '',
+      toUnit: '',
       vibrationOn: true
     },
 
     onInit() {
+      this.L = i18n.page('unit')
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -401,11 +404,11 @@
     resetUnits() {
       this.fromIndex = 0
       this.toIndex = categories[this.catIndex].units.length > 1 ? 1 : 0
-      if (categories[this.catIndex].name === '长度') {
+      if (categories[this.catIndex].id === 'length') {
         this.fromIndex = 2
         this.toIndex = 5
       }
-      if (categories[this.catIndex].name === '数据大小') {
+      if (categories[this.catIndex].id === 'data') {
         this.fromIndex = 2
         this.toIndex = 3
       }
@@ -440,9 +443,13 @@
 
     refreshLabels() {
       var cat = categories[this.catIndex]
-      this.catName = cat.name
-      this.fromUnit = cat.units[this.fromIndex].name
-      this.toUnit = cat.units[this.toIndex].name
+      this.catName = this.L.cats[cat.id]
+      this.fromUnit = this.unitName(cat.units[this.fromIndex])
+      this.toUnit = this.unitName(cat.units[this.toIndex])
+    },
+
+    unitName(unit) {
+      return this.L.units[unit.id] || unit.id
     },
 
     pressKey(key) {
@@ -483,7 +490,7 @@
       var from = cat.units[this.fromIndex]
       var to = cat.units[this.toIndex]
       var result
-      if (cat.name === '温度') {
+      if (cat.id === 'temp') {
         var celsius = this.toCelsius(val, from.key)
         result = this.fromCelsius(celsius, to.key)
       } else {
@@ -514,7 +521,7 @@
 
     saveHistory() {
       if (this.inputValue === '0' || !this.inputValue) return
-      if (this.outputValue === '0' || this.outputValue === '错误') return
+      if (this.outputValue === '0' || this.outputValue === this.L.error) return
       var expr = this.inputValue + ' ' + this.fromUnit
       var result = this.outputValue + ' ' + this.toUnit
       storage.get({

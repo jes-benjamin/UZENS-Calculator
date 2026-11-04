@@ -28,7 +28,7 @@
         <div class="key key-equal" onclick="pressEqual"><text class="num-dark">=</text></div>
       </div>
       <div class="key-row">
-        <div class="key-more" onclick="openMore"><text class="func-text">更多</text></div>
+        <div class="key-more" onclick="openMore"><text class="func-text">{{L.more}}</text></div>
         <div class="key-ac-half" onclick="clearAll"><text class="func-text">AC</text></div>
       </div>
     </div>
@@ -54,7 +54,7 @@
         <div class="key key-equal" onclick="pressEqual"><text class="num-dark">=</text></div>
       </div>
       <div class="key-row">
-        <div class="key-more" onclick="openMore"><text class="func-text">更多</text></div>
+        <div class="key-more" onclick="openMore"><text class="func-text">{{L.more}}</text></div>
         <div class="key-ac-half" onclick="clearAll"><text class="func-text">AC</text></div>
       </div>
     </div>
@@ -80,7 +80,7 @@
         <div class="key key-equal" onclick="pressEqual"><text class="num-dark">=</text></div>
       </div>
       <div class="key-row">
-        <div class="key-more" onclick="openMore"><text class="func-text">更多</text></div>
+        <div class="key-more" onclick="openMore"><text class="func-text">{{L.more}}</text></div>
         <div class="key-ac-half" onclick="clearAll"><text class="func-text">AC</text></div>
       </div>
     </div>
@@ -106,7 +106,7 @@
         <div class="key key-equal" onclick="pressEqual"><text class="num-dark">=</text></div>
       </div>
       <div class="key-row">
-        <div class="key-more" onclick="openMore"><text class="func-text">更多</text></div>
+        <div class="key-more" onclick="openMore"><text class="func-text">{{L.more}}</text></div>
         <div class="key-ac-half" onclick="clearAll"><text class="func-text">AC</text></div>
       </div>
     </div>
@@ -132,7 +132,7 @@
         <div class="key key-equal" onclick="pressEqual"><text class="num-dark">=</text></div>
       </div>
       <div class="key-row">
-        <div class="key-more" onclick="openMore"><text class="func-text">更多</text></div>
+        <div class="key-more" onclick="openMore"><text class="func-text">{{L.more}}</text></div>
         <div class="key-ac-half" onclick="clearAll"><text class="func-text">AC</text></div>
       </div>
     </div>
@@ -340,6 +340,7 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   // ===== 常见化学反应数据库 =====
   // key: 反应物化学式按字母排序后用+连接（不含系数）
@@ -765,15 +766,15 @@
   function Fdiv(a, b) { return F(a[0] * b[1], b[0] * a[1]) }
   function FisZero(a) { return a[0] === 0 }
 
-  var LABELS = ['常见元素1', '常见元素2', '数字符号', '其他元素', '更多元素']
   var TOTAL = 5
   var CHEM_EXPR_KEY = 'chem_expr_v2'
   var HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('chemical'),
       expression: '',
-      result: '等待输入',
+      result: '',
       keyPage: 0,
       vibrationOn: true,
       autoCalcOn: true
@@ -781,10 +782,10 @@
 
     computed: {
       displayExpression() {
-        return this.expression === '' ? '化学方程式' : this.expression
+        return this.expression === '' ? this.L.placeholder : this.expression
       },
       currentLabel() {
-        return LABELS[this.keyPage]
+        return this.L.labels[this.keyPage]
       }
     },
 
@@ -794,6 +795,8 @@
     },
 
     onInit() {
+      this.L = i18n.page('chemical')
+      this.result = this.L.waiting
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -875,7 +878,7 @@
     clearAll() {
       this.doVibrate()
       this.expression = ''
-      this.result = '等待输入'
+      this.result = this.L.waiting
     },
 
     openMore() {
@@ -895,7 +898,7 @@
 
     refresh() {
       if (this.expression === '') {
-        this.result = '等待输入'
+        this.result = this.L.waiting
         return
       }
       if (this.expression.indexOf('=') === -1) {
@@ -904,10 +907,10 @@
           if (predicted) {
             this.result = '\u2192 ' + predicted
           } else {
-            this.result = '输入 = 配平'
+            this.result = this.L.typeEquals
           }
         } else {
-          this.result = '输入 = 配平'
+          this.result = this.L.typeEquals
         }
         return
       }
@@ -921,13 +924,13 @@
             if (balanced) {
               this.result = balanced
             } else {
-              this.result = '无法配平'
+              this.result = this.L.cannotBalance
             }
           } else {
-            this.result = '请输入生成物'
+            this.result = this.L.enterProducts
           }
         } else {
-          this.result = '请输入生成物'
+          this.result = this.L.enterProducts
         }
         return
       }
@@ -935,7 +938,7 @@
       if (balanced) {
         this.result = balanced
       } else {
-        this.result = '无法配平'
+        this.result = this.L.cannotBalance
       }
     },
 
@@ -1277,7 +1280,7 @@
 
     saveHistoryIfBalanced() {
       if (this.expression === '' || this.expression.indexOf('=') === -1) return
-      if (this.result === '等待输入' || this.result === '无法配平' || this.result === '请输入生成物') return
+      if (this.result === this.L.waiting || this.result === this.L.cannotBalance || this.result === this.L.enterProducts) return
       if (this.result.indexOf('\u2192') !== -1) return
       this.addHistory(this.expression, this.result)
     },

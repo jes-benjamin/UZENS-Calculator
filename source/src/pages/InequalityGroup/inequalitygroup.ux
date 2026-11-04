@@ -276,29 +276,32 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
-  var LABELS = ['数字输入', '运算符', '科学函数', '分隔符']
   var TOTAL = 4
   var HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('inequalitygroup'),
       expression: '',
-      result: '等待输入',
+      result: '',
       keyPage: 0,
       vibrationOn: true
     },
 
     computed: {
       displayExpression() {
-        return this.expression || '如: 2x+3>7;x<6'
+        return this.expression || this.L.placeholder
       },
       currentLabel() {
-        return LABELS[this.keyPage]
+        return this.L.labels[this.keyPage]
       }
     },
 
     onInit() {
+      this.L = i18n.page('inequalitygroup')
+      this.result = this.L.waiting
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -332,7 +335,7 @@
     clearAll() {
       this.doVibrate()
       this.expression = ''
-      this.result = '等待输入'
+      this.result = this.L.waiting
     },
 
     deleteLast() {
@@ -341,15 +344,15 @@
         this.expression = this.expression.substring(0, this.expression.length - 1)
       }
       if (this.expression.length === 0) {
-        this.result = '等待输入'
+        this.result = this.L.waiting
       }
     },
 
     pressChar(ch) {
       this.doVibrate()
-      if (this.result !== '等待输入' && this.result !== '格式错误' && this.result !== '无法解析' && this.result !== '请输入不等式组') {
+      if (this.result !== this.L.waiting && this.result !== this.L.badFormat && this.result !== this.L.cannotParse && this.result !== this.L.enterGroup) {
         this.expression = ''
-        this.result = '等待输入'
+        this.result = this.L.waiting
       }
       this.expression += ch
     },
@@ -358,12 +361,12 @@
       this.doVibrate()
       var expr = this.expression.replace(/\s/g, '').replace(/−/g, '-')
       if (expr.length === 0) {
-        this.result = '请输入不等式组'
+        this.result = this.L.enterGroup
         return
       }
 
       if (/log\(|ln\(|lg\(|sin\(|cos\(|tan\(|e\^|π/.test(expr)) {
-        this.result = '暂不支持超越函数组'
+        this.result = this.L.noTranscendental
         return
       }
 
@@ -374,7 +377,7 @@
       }
 
       if (inequalities.length === 0) {
-        this.result = '请输入不等式组'
+        this.result = this.L.enterGroup
         return
       }
 
@@ -382,14 +385,14 @@
       for (var i = 0; i < inequalities.length; i++) {
         var parsed = this.splitInequality(inequalities[i])
         if (!parsed) {
-          this.result = '格式错误'
+          this.result = this.L.badFormat
           return
         }
         try {
           var range = this.solveIneqRange(parsed.left, parsed.op, parsed.right)
           ranges.push(range)
         } catch (e) {
-          this.result = '无法解析'
+          this.result = this.L.cannotParse
           return
         }
       }
@@ -397,11 +400,11 @@
       try {
         var result = this.intersectRanges(ranges)
         this.result = this.rangeToStr(result)
-        if (this.result !== '无解' && this.result !== '格式错误' && this.result !== '无法解析') {
+        if (this.result !== this.L.noSolution && this.result !== this.L.badFormat && this.result !== this.L.cannotParse) {
           this.addHistory(this.expression, this.result)
         }
       } catch (e) {
-        this.result = '无法解析'
+        this.result = this.L.cannotParse
       }
     },
 
@@ -839,8 +842,8 @@
     },
 
     rangeToStr(r) {
-      if (r.type === 'all') return '\u5168\u4f53\u5b9e\u6570'
-      if (r.type === 'none') return '\u65e0\u89e3'
+      if (r.type === 'all') return this.L.allReals
+      if (r.type === 'none') return this.L.noSolution
       if (r.type === 'single') return 'x=' + this.formatNum(r.val)
       if (r.type === 'gt') return 'x > ' + this.formatNum(r.val)
       if (r.type === 'lt') return 'x < ' + this.formatNum(r.val)
@@ -852,9 +855,9 @@
         return loBracket + this.formatNum(r.lo) + ', ' + this.formatNum(r.hi) + hiBracket
       }
       if (r.type === 'union') {
-        return this.rangeToStr(r.r1) + ' \u6216 ' + this.rangeToStr(r.r2)
+        return this.rangeToStr(r.r1) + ' ' + this.L.or + ' ' + this.rangeToStr(r.r2)
       }
-      return '\u65e0\u89e3'
+      return this.L.noSolution
     },
 
     /* ===== 表达式解析器 ===== */

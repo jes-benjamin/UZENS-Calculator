@@ -1,14 +1,14 @@
 <template>
   <div class="page">
-    <text class="title-text">BMI计算</text>
+    <text class="title-text">{{L.title}}</text>
 
     <div class="input-row">
       <div class="field-btn" onclick="selectField('height')">
-        <text class="field-label">身高cm</text>
+        <text class="field-label">{{L.heightCm}}</text>
         <text class="field-value">{{heightText}}</text>
       </div>
       <div class="field-btn" onclick="selectField('weight')">
-        <text class="field-label">体重kg</text>
+        <text class="field-label">{{L.weightKg}}</text>
         <text class="field-value">{{weightText}}</text>
       </div>
     </div>
@@ -39,7 +39,7 @@
       </div>
       <div class="key-row">
         <div class="wide-key key-func" onclick="pressKey('.')"><text class="key-text">.</text></div>
-        <div class="wide-key key-ok" onclick="switchField"><text class="key-small">下一项</text></div>
+        <div class="wide-key key-ok" onclick="switchField"><text class="key-small">{{L.next}}</text></div>
       </div>
     </div>
   </div>
@@ -195,11 +195,13 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('bmi'),
       currentField: 'height',
       heightValue: '',
       weightValue: '',
@@ -207,6 +209,7 @@
     },
 
     onInit() {
+      this.L = i18n.page('bmi')
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -234,7 +237,7 @@
       bmiValue() {
         var h = parseFloat(this.heightValue)
         var w = parseFloat(this.weightValue)
-        if (!h || !w) return '请输入'
+        if (!h || !w) return this.L.enter
         var m = h / 100
         var bmi = w / (m * m)
         return String(parseFloat(bmi.toFixed(1)))
@@ -243,13 +246,13 @@
       bmiLevel() {
         var h = parseFloat(this.heightValue)
         var w = parseFloat(this.weightValue)
-        if (!h || !w) return '身高和体重'
+        if (!h || !w) return this.L.heightWeight
         var m = h / 100
         var bmi = w / (m * m)
-        if (bmi < 18.5) return '偏瘦'
-        if (bmi < 24) return '正常'
-        if (bmi < 28) return '超重'
-        return '肥胖'
+        if (bmi < 18.5) return this.L.under
+        if (bmi < 24) return this.L.normal
+        if (bmi < 28) return this.L.over
+        return this.L.obese
       }
     },
 
@@ -304,7 +307,7 @@
       var m = h / 100
       var bmi = w / (m * m)
       var result = 'BMI ' + String(parseFloat(bmi.toFixed(1))) + ' ' + this.bmiLevel
-      var expr = '身高' + this.heightValue + 'cm 体重' + this.weightValue + 'kg'
+      var expr = this.L.height + this.heightValue + 'cm ' + this.L.weight + this.weightValue + 'kg'
       this.addHistory('BMI计算', expr, result)
     },
 

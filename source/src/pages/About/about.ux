@@ -5,13 +5,13 @@
         <image class="app-logo" src="/Common/icon.png"></image>
       </list-item>
       <list-item class="list-cell">
-        <text class="app-name">矩阵计算器</text>
+        <text class="app-name">{{L.appName}}</text>
       </list-item>
       <list-item class="list-cell">
         <text class="app-version">V5.2.1</text>
       </list-item>
       <list-item class="list-cell">
-        <text class="section-label">开发团队</text>
+        <text class="section-label">{{L.devTeam}}</text>
       </list-item>
       <list-item class="list-cell">
         <div class="dev-card">
@@ -19,7 +19,7 @@
         </div>
       </list-item>
       <list-item class="list-cell">
-        <text class="section-label">参与开发的人员</text>
+        <text class="section-label">{{L.contributors}}</text>
       </list-item>
       <list-item class="list-cell">
         <div class="dev-card">
@@ -37,19 +37,19 @@
         </div>
       </list-item>
       <list-item class="list-cell">
-        <text class="link-label">官方网站</text>
+        <text class="link-label">{{L.website}}</text>
       </list-item>
       <list-item class="list-cell">
         <text class="link-text">calculator.uzens.cc.cd</text>
       </list-item>
       <list-item class="list-cell">
-        <text class="link-label">官方Q群</text>
+        <text class="link-label">{{L.qqGroup}}</text>
       </list-item>
       <list-item class="list-cell">
         <text class="link-text">1128452332</text>
       </list-item>
       <list-item class="list-cell">
-        <text class="link-label">更多资源请访问</text>
+        <text class="link-label">{{L.moreResources}}</text>
       </list-item>
       <list-item class="list-cell">
         <text class="link-text">bandbbs.cn</text>
@@ -153,8 +153,17 @@
 
 <script>
   import router from '@system.router'
+  import i18n from '../../i18n/index.js'
 
   export default {
+    private: {
+      L: i18n.page('about')
+    },
+
+    onInit() {
+      this.L = i18n.page('about')
+    },
+
     onBackPress() {
       router.back()
       return true

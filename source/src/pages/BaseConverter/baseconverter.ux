@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div class="title-bar">
-      <text class="title-text">进制转换</text>
+      <text class="title-text">{{L.title}}</text>
     </div>
 
     <div class="base-nav">
@@ -23,7 +23,7 @@
 
     <div class="to-base-nav">
       <div class="small-btn" onclick="prevToBase"><text class="small-text">‹</text></div>
-      <text class="to-base-label">输出: {{toBaseName}}</text>
+      <text class="to-base-label">{{L.output}}: {{toBaseName}}</text>
       <div class="small-btn" onclick="nextToBase"><text class="small-text">›</text></div>
     </div>
 
@@ -271,13 +271,14 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var BASES = [2, 8, 10, 16]
-  var BASE_NAMES = { 2: '二进制', 8: '八进制', 10: '十进制', 16: '十六进制' }
   var HISTORY_KEY = 'calc_history_v2'
 
   export default {
     private: {
+      L: i18n.page('baseconverter'),
       fromBaseIndex: 2,
       toBaseIndex: 0,
       inputValue: '',
@@ -285,6 +286,7 @@
     },
 
     onInit() {
+      this.L = i18n.page('baseconverter')
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -305,10 +307,10 @@
         return BASES[this.fromBaseIndex]
       },
       fromBaseName() {
-        return BASE_NAMES[this.fromBase]
+        return this.L.baseNames[this.fromBase]
       },
       toBaseName() {
-        return BASE_NAMES[BASES[this.toBaseIndex]]
+        return this.L.baseNames[BASES[this.toBaseIndex]]
       },
       inputText() {
         return this.inputValue || '0'
@@ -316,7 +318,7 @@
       outputValue() {
         if (!this.inputValue) return '0'
         var dec = parseInt(this.inputValue, this.fromBase)
-        if (isNaN(dec)) return '错误'
+        if (isNaN(dec)) return this.L.error
         return dec.toString(BASES[this.toBaseIndex]).toUpperCase()
       }
     },
@@ -375,10 +377,10 @@
 
     saveHistory() {
       if (!this.inputValue) return
-      var expr = this.inputValue + '(' + BASE_NAMES[this.fromBase] + ')'
+      var expr = this.inputValue + '(' + this.L.baseNames[this.fromBase] + ')'
       var result = this.outputValue
-      if (result === '错误' || result === '0') return
-      result = result + '(' + BASE_NAMES[BASES[this.toBaseIndex]] + ')'
+      if (result === this.L.error || result === '0') return
+      result = result + '(' + this.L.baseNames[BASES[this.toBaseIndex]] + ')'
       var self = this
       storage.get({
         key: HISTORY_KEY,

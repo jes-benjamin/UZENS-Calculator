@@ -1,39 +1,39 @@
 <template>
   <div class="page">
-    <text class="title-text">家族称谓计算</text>
+    <text class="title-text">{{L.title}}</text>
 
     <div class="chain-box">
       <text class="chain-text">{{chainText}}</text>
     </div>
 
     <div class="result-box">
-      <text class="result-label">称谓</text>
+      <text class="result-label">{{L.term}}</text>
       <text class="result-text">{{resultText}}</text>
     </div>
 
     <div class="kb-wrapper">
       <div class="nav-side" onclick="prevPage"><text class="nav-side-text">‹</text></div>
       <div class="relation-grid" if="{{keyPage === 0}}">
-        <div class="rel-btn" onclick="addRel('爸爸')"><text class="rel-text">爸爸</text></div>
-        <div class="rel-btn" onclick="addRel('妈妈')"><text class="rel-text">妈妈</text></div>
-        <div class="rel-btn" onclick="addRel('哥哥')"><text class="rel-text">哥哥</text></div>
-        <div class="rel-btn" onclick="addRel('弟弟')"><text class="rel-text">弟弟</text></div>
-        <div class="rel-btn" onclick="addRel('姐姐')"><text class="rel-text">姐姐</text></div>
-        <div class="rel-btn" onclick="addRel('妹妹')"><text class="rel-text">妹妹</text></div>
+        <div class="rel-btn" onclick="addRel('爸爸')"><text class="rel-text">{{L.buttons['爸爸']}}</text></div>
+        <div class="rel-btn" onclick="addRel('妈妈')"><text class="rel-text">{{L.buttons['妈妈']}}</text></div>
+        <div class="rel-btn" onclick="addRel('哥哥')"><text class="rel-text">{{L.buttons['哥哥']}}</text></div>
+        <div class="rel-btn" onclick="addRel('弟弟')"><text class="rel-text">{{L.buttons['弟弟']}}</text></div>
+        <div class="rel-btn" onclick="addRel('姐姐')"><text class="rel-text">{{L.buttons['姐姐']}}</text></div>
+        <div class="rel-btn" onclick="addRel('妹妹')"><text class="rel-text">{{L.buttons['妹妹']}}</text></div>
       </div>
       <div class="relation-grid" if="{{keyPage === 1}}">
-        <div class="rel-btn" onclick="addRel('丈夫')"><text class="rel-text">丈夫</text></div>
-        <div class="rel-btn" onclick="addRel('妻子')"><text class="rel-text">妻子</text></div>
-        <div class="rel-btn" onclick="addRel('儿子')"><text class="rel-text">儿子</text></div>
-        <div class="rel-btn" onclick="addRel('女儿')"><text class="rel-text">女儿</text></div>
+        <div class="rel-btn" onclick="addRel('丈夫')"><text class="rel-text">{{L.buttons['丈夫']}}</text></div>
+        <div class="rel-btn" onclick="addRel('妻子')"><text class="rel-text">{{L.buttons['妻子']}}</text></div>
+        <div class="rel-btn" onclick="addRel('儿子')"><text class="rel-text">{{L.buttons['儿子']}}</text></div>
+        <div class="rel-btn" onclick="addRel('女儿')"><text class="rel-text">{{L.buttons['女儿']}}</text></div>
       </div>
       <div class="nav-side" onclick="nextPage"><text class="nav-side-text">›</text></div>
     </div>
     <text class="page-label-bottom">{{currentLabel}}</text>
 
     <div class="action-row">
-      <div class="action-btn" onclick="deleteLast"><text class="action-text">删除</text></div>
-      <div class="action-btn action-clear" onclick="clearAll"><text class="action-text">清空</text></div>
+      <div class="action-btn" onclick="deleteLast"><text class="action-text">{{L.delete}}</text></div>
+      <div class="action-btn action-clear" onclick="clearAll"><text class="action-text">{{L.clear}}</text></div>
     </div>
   </div>
 </template>
@@ -203,8 +203,8 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
-  var LABELS = ['直系长辈同辈', '配偶子辈']
   var TOTAL = 2
   var HISTORY_KEY = 'calc_history_v2'
 
@@ -353,12 +353,14 @@
 
   export default {
     private: {
+      L: i18n.page('kinship'),
       rels: [],
       vibrationOn: true,
       keyPage: 0
     },
 
     onInit() {
+      this.L = i18n.page('kinship')
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -386,18 +388,23 @@
 
     computed: {
       chainText() {
-        if (this.rels.length === 0) return '请选择关系'
-        return this.rels.join('的')
+        if (this.rels.length === 0) return this.L.pick
+        var words = []
+        for (var i = 0; i < this.rels.length; i++) {
+          words.push(this.L.words[this.rels[i]])
+        }
+        var text = words.join(this.L.of)
+        return text.charAt(0).toUpperCase() + text.substring(1)
       },
 
       resultText() {
-        if (this.rels.length === 0) return '未选择'
+        if (this.rels.length === 0) return this.L.none
         var key = this.rels.join('的')
-        return MAP[key] || key
+        return MAP[key] || this.L.noTerm || key
       },
 
       currentLabel() {
-        return LABELS[this.keyPage]
+        return this.L.labels[this.keyPage]
       }
     },
 

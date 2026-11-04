@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div class="title-bar">
-      <text class="title-text">方程式分析</text>
+      <text class="title-text">{{L.title}}</text>
     </div>
     <div class="eq-box">
       <text class="eq-text">{{equation}}</text>
@@ -91,6 +91,7 @@
 <script>
   import router from '@system.router'
   import storage from '@system.storage'
+  import i18n from '../../i18n/index.js'
 
   var CHEM_EXPR_KEY = 'chem_expr_v2'
 
@@ -120,11 +121,13 @@
 
   export default {
     private: {
+      L: i18n.page('chemicalanalysis'),
       equation: '',
       analysisLines: []
     },
 
     onInit() {
+      this.L = i18n.page('chemicalanalysis')
       var self = this
       storage.get({
         key: CHEM_EXPR_KEY,
@@ -147,13 +150,13 @@
     analyze() {
       var eq = this.equation.replace(/\s/g, '')
       if (eq === '' || eq.indexOf('=') === -1) {
-        this.analysisLines = ['请输入完整方程式']
+        this.analysisLines = [this.L.enterFull]
         return
       }
 
       var parts = eq.split('=')
       if (parts.length !== 2) {
-        this.analysisLines = ['方程式格式错误']
+        this.analysisLines = [this.L.badFormat]
         return
       }
 
@@ -164,7 +167,7 @@
       var rightMols = this.parseSide(rightStr)
 
       if (leftMols.length === 0 || rightMols.length === 0) {
-        this.analysisLines = ['无法解析方程式']
+        this.analysisLines = [this.L.cannotParse]
         return
       }
 
@@ -172,7 +175,7 @@
 
       // 1. 反应类型判断
       var rxnType = this.judgeReactionType(leftMols, rightMols)
-      lines.push('反应类型: ' + rxnType)
+      lines.push(this.L.rxnType + ': ' + rxnType)
 
       // 2. 化合价分析
       var valenceChanges = this.analyzeValence(leftMols, rightMols)
@@ -180,19 +183,19 @@
       // 3. 氧化还原判断
       var hasRedox = valenceChanges.length > 0
       if (hasRedox) {
-        lines.push('该反应为氧化还原反应')
+        lines.push(this.L.isRedox)
         var redoxInfo = this.judgeRedox(leftMols, rightMols, valenceChanges)
-        lines.push('氧化剂: ' + redoxInfo.oxidizer)
-        lines.push('还原剂: ' + redoxInfo.reducer)
-        lines.push('氧化产物: ' + redoxInfo.oxProduct)
-        lines.push('还原产物: ' + redoxInfo.redProduct)
-        lines.push('---化合价变化---')
+        lines.push(this.L.oxidizer + ': ' + redoxInfo.oxidizer)
+        lines.push(this.L.reducer + ': ' + redoxInfo.reducer)
+        lines.push(this.L.oxProduct + ': ' + redoxInfo.oxProduct)
+        lines.push(this.L.redProduct + ': ' + redoxInfo.redProduct)
+        lines.push('---' + this.L.valenceChanges + '---')
         for (var i = 0; i < valenceChanges.length; i++) {
           var v = valenceChanges[i]
           lines.push(v.elem + ': ' + v.from + ' → ' + v.to)
         }
       } else {
-        lines.push('该反应为非氧化还原反应')
+        lines.push(this.L.notRedox)
       }
 
       this.analysisLines = lines
@@ -234,17 +237,17 @@
         rightIsElement.push(this.isElement(rightMols[j].formula))
       }
 
-      if (leftMols.length === 1 && rightMols.length >= 2) return '分解反应'
-      if (leftMols.length >= 2 && rightMols.length === 1) return '化合反应'
+      if (leftMols.length === 1 && rightMols.length >= 2) return this.L.decomposition
+      if (leftMols.length >= 2 && rightMols.length === 1) return this.L.synthesis
 
       var leftHasElement = false
       var rightHasElement = false
       for (var a = 0; a < leftIsElement.length; a++) if (leftIsElement[a]) leftHasElement = true
       for (var b = 0; b < rightIsElement.length; b++) if (rightIsElement[b]) rightHasElement = true
 
-      if (leftHasElement && rightHasElement) return '置换反应'
-      if (!leftHasElement && !rightHasElement) return '复分解反应'
-      return '氧化还原反应/其他'
+      if (leftHasElement && rightHasElement) return this.L.displacement
+      if (!leftHasElement && !rightHasElement) return this.L.doubleDisplacement
+      return this.L.redoxOther
     },
 
     isElement(formula) {
@@ -707,7 +710,7 @@
     },
 
     judgeRedox(leftMols, rightMols, valenceChanges) {
-      var result = { oxidizer: '未知', reducer: '未知', oxProduct: '未知', redProduct: '未知' }
+      var result = { oxidizer: this.L.unknown, reducer: this.L.unknown, oxProduct: this.L.unknown, redProduct: this.L.unknown }
 
       // 找化合价降低的元素 -> 氧化剂
       // 找化合价升高的元素 -> 还原剂
@@ -751,12 +754,12 @@
         return names.join(',')
       }
       if (loweredElems.length > 0) {
-        result.oxidizer = leftContains(leftMols, loweredElems) || '未知'
-        result.redProduct = rightContains(rightMols, loweredElems) || '未知'
+        result.oxidizer = leftContains(leftMols, loweredElems) || this.L.unknown
+        result.redProduct = rightContains(rightMols, loweredElems) || this.L.unknown
       }
       if (raisedElems.length > 0) {
-        result.reducer = leftContains(leftMols, raisedElems) || '未知'
-        result.oxProduct = rightContains(rightMols, raisedElems) || '未知'
+        result.reducer = leftContains(leftMols, raisedElems) || this.L.unknown
+        result.oxProduct = rightContains(rightMols, raisedElems) || this.L.unknown
       }
 
       return result

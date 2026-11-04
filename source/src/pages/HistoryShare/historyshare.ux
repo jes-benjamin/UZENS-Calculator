@@ -1,12 +1,12 @@
 <template>
   <div class="page">
     <div class="back-btn" onclick="goBack">
-      <text class="back-text">‹ 返回</text>
+      <text class="back-text">‹ {{L.back}}</text>
     </div>
     <div class="qr-box">
       <qrcode class="qr-code" value="{{qrText}}"></qrcode>
     </div>
-    <text class="qr-caption">扫码查看记录内容</text>
+    <text class="qr-caption">{{L.scanHint}}</text>
   </div>
 </template>
 
@@ -68,16 +68,19 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var SHARE_KEY = 'history_share_v1'
 
   export default {
     private: {
+      L: i18n.page('historyshare'),
       qrText: '',
       vibrationOn: true
     },
 
     onInit() {
+      this.L = i18n.page('historyshare')
       var self = this
       storage.get({
         key: 'setting_vibration',
@@ -91,7 +94,9 @@
           if (data) {
             try {
               var obj = JSON.parse(data)
-              self.qrText = '矩阵计算器历史记录\n类型: ' + (obj.type || '计算器') + '\n表达式: ' + (obj.expr || '') + '\n结果: ' + (obj.result || '')
+              var L = self.L
+              var type = obj.type || '计算器'
+              self.qrText = L.qrTitle + '\n' + L.qrType + ': ' + (L.types[type] || type) + '\n' + L.qrExpr + ': ' + (obj.expr || '') + '\n' + L.qrResult + ': ' + (obj.result || '')
             } catch (e) {
               self.qrText = data
             }

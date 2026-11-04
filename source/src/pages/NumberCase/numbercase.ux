@@ -22,12 +22,12 @@
         <div class="key key-num" onclick="pressKey('1')"><text class="num-text">1</text></div>
         <div class="key key-num" onclick="pressKey('2')"><text class="num-text">2</text></div>
         <div class="key key-num" onclick="pressKey('3')"><text class="num-text">3</text></div>
-        <div class="key key-equal" onclick="saveResult"><text class="func-text">记录</text></div>
+        <div class="key key-equal" onclick="saveResult"><text class="func-text">{{L.save}}</text></div>
       </div>
       <div class="key-row">
         <div class="key key-zero" onclick="pressKey('0')"><text class="num-text">0</text></div>
         <div class="key key-num" onclick="pressKey('.')"><text class="num-text">.</text></div>
-        <div class="key key-soft" onclick="toggleMode"><text class="mode-text">{{isUpper ? '大' : '小'}}</text></div>
+        <div class="key key-soft" onclick="toggleMode"><text class="mode-text">{{isUpper ? L.modeUpper : L.modeLower}}</text></div>
       </div>
     </div>
   </div>
@@ -167,6 +167,7 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import vibrator from '@system.vibrator'
+  import i18n from '../../i18n/index.js'
 
   var HISTORY_KEY = 'calc_history_v2'
 
@@ -279,6 +280,7 @@
 
   export default {
     private: {
+      L: i18n.page('numbercase'),
       inputText: '',
       resultText: '',
       isUpper: true,
@@ -286,6 +288,7 @@
     },
 
     onInit() {
+      this.L = i18n.page('numbercase')
       var self = this
       storage.get({
         key: 'setting_vibration',

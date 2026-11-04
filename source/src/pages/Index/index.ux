@@ -7,21 +7,21 @@
     <text class="clock-text">{{currentTime}}</text>
 
     <!-- 标题 -->
-    <text class="app-title">矩阵计算器</text>
+    <text class="app-title">{{L.appName}}</text>
 
     <!-- 菜单列表（可滚动） -->
     <list class="menu-list">
       <list-item class="section-header" if="{{hasPinned}}">
-        <text class="section-text">置顶功能</text>
+        <text class="section-text">{{L.pinnedSection}}</text>
       </list-item>
       <list-item class="menu-item item-pinned" for="{{pinnedItems}}" tid="id" onclick="openItem($item)" onlongpress="togglePin($item)">
         <image class="menu-icon-img" if="{{$item.hasImg}}" src="{{$item.img}}"></image>
         <div class="menu-icon-box" if="{{$item.hasIcon}}"><text class="menu-icon-text">{{$item.icon}}</text></div>
         <text class="menu-text">{{$item.label}}</text>
-        <text class="pin-badge">置顶</text>
+        <text class="pin-badge">{{L.pinBadge}}</text>
       </list-item>
       <list-item class="section-header" if="{{hasPinned}}">
-        <text class="section-text">全部功能</text>
+        <text class="section-text">{{L.allSection}}</text>
       </list-item>
       <list-item class="menu-item" for="{{menuItems}}" tid="id" onclick="openItem($item)" onlongpress="togglePin($item)">
         <image class="menu-icon-img" if="{{$item.hasImg}}" src="{{$item.img}}"></image>
@@ -171,31 +171,32 @@
   import router from '@system.router'
   import storage from '@system.storage'
   import prompt from '@system.prompt'
+  import i18n from '../../i18n/index.js'
 
   var PIN_KEY = 'index_pinned_v1'
 
   var MENU = [
-    { id: 'standard', label: '标准计算器', img: '/Common/menu_standard.png', route: '/pages/Standard' },
-    { id: 'scientific', label: '科学计算器', img: '/Common/menu_scientific.png', route: '/pages/Scientific' },
-    { id: 'unit', label: '单位换算', img: '/Common/menu_unit.png', route: '/pages/Unit' },
-    { id: 'graph', label: '函数图像', img: '/Common/menu_graph.png', route: '/pages/Graph' },
-    { id: 'triangle', label: '三角几何', img: '/Common/menu_triangle.png', route: '/pages/Triangle' },
-    { id: 'derivative', label: '求导函数值', img: '/Common/menu_derivative.png', route: '/pages/Derivative' },
-    { id: 'monotonicity', label: '函数单调性计算', img: '/Common/menu_monotonicity.png', route: '/pages/Monotonicity' },
-    { id: 'linearregression', label: '线性回归计算', img: '/Common/menu_linearregression.png', route: '/pages/LinearRegression' },
-    { id: 'bmi', label: 'BMI计算', img: '/Common/menu_bmi.png', route: '/pages/BMI' },
-    { id: 'currency', label: '货币换算', img: '/Common/menu_currency.png', route: '/pages/Currency' },
-    { id: 'baseconverter', label: '进制转换', img: '/Common/menu_baseconverter.png', route: '/pages/BaseConverter' },
-    { id: 'studytools', label: '公式大全', img: '/Common/menu_studytools.png', route: '/pages/Formulas' },
-    { id: 'equation', label: '解方程', img: '/Common/menu_equation.png', route: '/pages/Equation' },
-    { id: 'inequality', label: '解不等式', img: '/Common/menu_inequality.png', route: '/pages/Inequality' },
-    { id: 'inequalitygroup', label: '解不等式组', img: '/Common/menu_inequalitygroup.png', route: '/pages/InequalityGroup' },
-    { id: 'chemical', label: '化学方程式', img: '/Common/menu_chemical.png', route: '/pages/Chemical' },
-    { id: 'kinship', label: '家族称谓计算', img: '/Common/menu_kinship.png', route: '/pages/Kinship' },
-    { id: 'numbercase', label: '数字大小写转换', img: '/Common/menu_numbercase.png', route: '/pages/NumberCase' },
-    { id: 'random', label: '随机数生成', img: '/Common/menu_random.png', route: '/pages/Random' },
-    { id: 'history', label: '历史记录', img: '/Common/menu_history.png', route: '/pages/History' },
-    { id: 'settings', label: '设置', img: '/Common/menu_settings.png', route: '/pages/Settings' }
+    { id: 'standard', img: '/Common/menu_standard.png', route: '/pages/Standard' },
+    { id: 'scientific', img: '/Common/menu_scientific.png', route: '/pages/Scientific' },
+    { id: 'unit', img: '/Common/menu_unit.png', route: '/pages/Unit' },
+    { id: 'graph', img: '/Common/menu_graph.png', route: '/pages/Graph' },
+    { id: 'triangle', img: '/Common/menu_triangle.png', route: '/pages/Triangle' },
+    { id: 'derivative', img: '/Common/menu_derivative.png', route: '/pages/Derivative' },
+    { id: 'monotonicity', img: '/Common/menu_monotonicity.png', route: '/pages/Monotonicity' },
+    { id: 'linearregression', img: '/Common/menu_linearregression.png', route: '/pages/LinearRegression' },
+    { id: 'bmi', img: '/Common/menu_bmi.png', route: '/pages/BMI' },
+    { id: 'currency', img: '/Common/menu_currency.png', route: '/pages/Currency' },
+    { id: 'baseconverter', img: '/Common/menu_baseconverter.png', route: '/pages/BaseConverter' },
+    { id: 'studytools', img: '/Common/menu_studytools.png', route: '/pages/Formulas' },
+    { id: 'equation', img: '/Common/menu_equation.png', route: '/pages/Equation' },
+    { id: 'inequality', img: '/Common/menu_inequality.png', route: '/pages/Inequality' },
+    { id: 'inequalitygroup', img: '/Common/menu_inequalitygroup.png', route: '/pages/InequalityGroup' },
+    { id: 'chemical', img: '/Common/menu_chemical.png', route: '/pages/Chemical' },
+    { id: 'kinship', img: '/Common/menu_kinship.png', route: '/pages/Kinship' },
+    { id: 'numbercase', img: '/Common/menu_numbercase.png', route: '/pages/NumberCase' },
+    { id: 'random', img: '/Common/menu_random.png', route: '/pages/Random' },
+    { id: 'history', img: '/Common/menu_history.png', route: '/pages/History' },
+    { id: 'settings', img: '/Common/menu_settings.png', route: '/pages/Settings' }
   ]
 
   for (var mi = 0; mi < MENU.length; mi++) {
@@ -205,6 +206,7 @@
 
   export default {
     private: {
+      L: i18n.page('index'),
       currentTime: '00:00',
       menuItems: MENU,
       pinnedItems: [],
@@ -213,9 +215,27 @@
     },
 
     onInit() {
+      var self = this
+      this.applyLang()
+      i18n.load(function() {
+        self.applyLang()
+      })
       this.updateTime()
       this.timer = setInterval(this.updateTime.bind(this), 10000)
       this.loadPins()
+    },
+
+    onShow() {
+      this.applyLang()
+    },
+
+    applyLang() {
+      this.L = i18n.page('index')
+      for (var i = 0; i < MENU.length; i++) {
+        MENU[i].label = this.L.menu[MENU[i].id]
+      }
+      this.menuItems = MENU.slice()
+      this.rebuildPinned()
     },
 
     onDestroy() {
@@ -270,10 +290,10 @@
       var idx = this.pinnedIds.indexOf(id)
       if (idx >= 0) {
         this.pinnedIds.splice(idx, 1)
-        prompt.showToast({ message: '已取消置顶' })
+        prompt.showToast({ message: this.L.unpinnedToast })
       } else {
         this.pinnedIds.push(id)
-        prompt.showToast({ message: '已置顶：' + item.label })
+        prompt.showToast({ message: this.L.pinnedToast + item.label })
       }
       this.rebuildPinned()
       storage.set({
