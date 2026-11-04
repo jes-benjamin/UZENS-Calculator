@@ -286,7 +286,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('baseconverter')
+      this.L = i18n.from(this).page('baseconverter')
       var self = this
       storage.get({
         key: 'setting_vibration',

@@ -224,7 +224,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('random')
+      this.L = i18n.from(this).page('random')
       this.resultDesc = this.L.tapToGenerate
       var self = this
       storage.get({

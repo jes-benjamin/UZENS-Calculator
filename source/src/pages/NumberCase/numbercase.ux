@@ -288,7 +288,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('numbercase')
+      this.L = i18n.from(this).page('numbercase')
       var self = this
       storage.get({
         key: 'setting_vibration',

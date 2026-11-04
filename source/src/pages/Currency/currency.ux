@@ -241,7 +241,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('currency')
+      this.L = i18n.from(this).page('currency')
       var self = this
       storage.get({
         key: 'setting_vibration',

@@ -127,7 +127,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('chemicalanalysis')
+      this.L = i18n.from(this).page('chemicalanalysis')
       var self = this
       storage.get({
         key: CHEM_EXPR_KEY,

@@ -301,7 +301,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('graph')
+      this.L = i18n.from(this).page('graph')
       var self = this
       storage.get({
         key: 'setting_vibration',

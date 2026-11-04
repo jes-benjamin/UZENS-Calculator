@@ -161,7 +161,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('about')
+      this.L = i18n.from(this).page('about')
     },
 
     onBackPress() {

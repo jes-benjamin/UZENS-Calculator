@@ -217,7 +217,7 @@
     onInit() {
       var self = this
       this.applyLang()
-      i18n.load(function() {
+      i18n.from(this).load(function() {
         self.applyLang()
       })
       this.updateTime()
@@ -230,7 +230,7 @@
     },
 
     applyLang() {
-      this.L = i18n.page('index')
+      this.L = i18n.from(this).page('index')
       for (var i = 0; i < MENU.length; i++) {
         MENU[i].label = this.L.menu[MENU[i].id]
       }

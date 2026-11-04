@@ -287,7 +287,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('derivative')
+      this.L = i18n.from(this).page('derivative')
       this.result = this.L.waiting
       var self = this
       storage.get({

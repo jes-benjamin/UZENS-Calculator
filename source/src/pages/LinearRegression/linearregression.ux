@@ -253,7 +253,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('linearregression')
+      this.L = i18n.from(this).page('linearregression')
       this.result = this.L.waiting
       var self = this
       storage.get({

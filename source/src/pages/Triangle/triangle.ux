@@ -397,7 +397,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('triangle')
+      this.L = i18n.from(this).page('triangle')
     },
 
     onBackPress() {

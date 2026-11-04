@@ -795,7 +795,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('chemical')
+      this.L = i18n.from(this).page('chemical')
       this.result = this.L.waiting
       var self = this
       storage.get({

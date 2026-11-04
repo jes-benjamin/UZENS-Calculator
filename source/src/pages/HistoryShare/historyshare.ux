@@ -80,7 +80,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('historyshare')
+      this.L = i18n.from(this).page('historyshare')
       var self = this
       storage.get({
         key: 'setting_vibration',

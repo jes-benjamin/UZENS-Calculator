@@ -194,11 +194,12 @@
     },
 
     onInit() {
-      this.L = i18n.page('settings')
       var self = this
-      i18n.load(function() {
-        self.langSetting = i18n.getSetting()
-        self.L = i18n.page('settings')
+      var lang = i18n.from(this)
+      this.L = lang.page('settings')
+      lang.load(function() {
+        self.langSetting = lang.getSetting()
+        self.L = lang.page('settings')
       })
       storage.get({
         key: KEY_VIBRATION,
@@ -260,9 +261,10 @@
     toggleLanguage() {
       this.doVibrate()
       var next = LANGS[(LANGS.indexOf(this.langSetting) + 1) % LANGS.length]
-      i18n.setSetting(next)
+      var lang = i18n.from(this)
+      lang.setSetting(next)
       this.langSetting = next
-      this.L = i18n.page('settings')
+      this.L = lang.page('settings')
     },
 
     toggleVibration() {

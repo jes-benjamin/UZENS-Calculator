@@ -293,7 +293,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('equation')
+      this.L = i18n.from(this).page('equation')
       this.result = this.L.waiting
       var self = this
       storage.get({

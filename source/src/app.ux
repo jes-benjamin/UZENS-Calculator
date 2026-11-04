@@ -11,6 +11,10 @@
       i18n.load()
     },
 
+    getI18n() {
+      return i18n
+    },
+
     onDestroy() {
       stopBackground()
     },

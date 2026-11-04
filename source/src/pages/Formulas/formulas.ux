@@ -470,8 +470,8 @@
     },
 
     onInit() {
-      this.L = i18n.page('formulas')
-      CATEGORIES = i18n.lang() === 'en' ? FORMULAS_EN : CATEGORIES_ZH
+      this.L = i18n.from(this).page('formulas')
+      CATEGORIES = i18n.from(this).lang() === 'en' ? FORMULAS_EN : CATEGORIES_ZH
       var names = []
       for (var i = 0; i < CATEGORIES.length; i++) {
         names.push(CATEGORIES[i].name)

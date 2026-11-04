@@ -300,7 +300,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('inequalitygroup')
+      this.L = i18n.from(this).page('inequalitygroup')
       this.result = this.L.waiting
       var self = this
       storage.get({

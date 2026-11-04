@@ -75,7 +75,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('reward')
+      this.L = i18n.from(this).page('reward')
     },
 
     onBackPress() {

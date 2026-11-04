@@ -209,7 +209,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('bmi')
+      this.L = i18n.from(this).page('bmi')
       var self = this
       storage.get({
         key: 'setting_vibration',

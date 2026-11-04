@@ -360,7 +360,7 @@
     },
 
     onInit() {
-      this.L = i18n.page('kinship')
+      this.L = i18n.from(this).page('kinship')
       var self = this
       storage.get({
         key: 'setting_vibration',

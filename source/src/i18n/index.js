@@ -35,6 +35,13 @@ function merge(a, b) {
 }
 
 export default {
+  // 每个页面都会打包一份本模块，状态不互通；以 app.ux 中的实例为准
+  from(vm) {
+    var def = vm && vm.$app && vm.$app.$def
+    if (def && typeof def.getI18n === 'function') return def.getI18n()
+    return this
+  },
+
   // 读取语言设置，完成后回调（已读取过则立即回调）
   load(cb) {
     if (loaded) {
