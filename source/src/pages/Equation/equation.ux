@@ -356,6 +356,13 @@
         return
       }
 
+      // 竖线绝对值写法转为 abs()
+      var sides = raw.split('=')
+      for (var si = 0; si < sides.length; si++) {
+        sides[si] = this.normalizeAbs(sides[si])
+      }
+      raw = sides.join('=')
+
       // 判断方程类型：含 ; 分隔符为二元方程组
       if (raw.indexOf(';') !== -1) {
         this.solveSystem(raw)
@@ -381,22 +388,23 @@
         var left = this.parsePolynomial(parts[0])
         var right = this.parsePolynomial(parts[1])
 
-        // 检查是否含有3次及以上项
-        var hasHighDegree = false
-        for (var k in left) {
-          if (left.hasOwnProperty(k) && k !== 'const') {
-            var deg = parseInt(k.substring(1))
-            if (deg >= 3) hasHighDegree = true
+        // 含 y 变量：提示使用方程组
+        var keys = Object.keys(left).concat(Object.keys(right))
+        for (var k = 0; k < keys.length; k++) {
+          if (keys[k].indexOf('y') >= 0) {
+            this.result = '含y变量请用方程组(;分隔)'
+            return
           }
         }
-        for (var k2 in right) {
-          if (right.hasOwnProperty(k2) && k2 !== 'const') {
-            var deg2 = parseInt(k2.substring(1))
-            if (deg2 >= 3) hasHighDegree = true
-          }
+
+        // 3次及以上项用数值求解
+        var hasHighDegree = false
+        for (var k2 = 0; k2 < keys.length; k2++) {
+          var ex = this.keyToExp(keys[k2])
+          if (ex && ex.nx + ex.ny >= 3) hasHighDegree = true
         }
         if (hasHighDegree) {
-          this.result = '仅支持一、二次方程'
+          this.solveEquationNumerical(parts[0], parts[1])
           return
         }
 
@@ -404,15 +412,6 @@
         var a = (left.x2 || 0) - (right.x2 || 0)
         var b = (left.x1 || 0) - (right.x1 || 0)
         var c = (left.const || 0) - (right.const || 0)
-
-        // 如果同时有y变量，也尝试处理
-        var ay = (left.y1 || 0) - (right.y1 || 0)
-        var by = (left.y2 || 0) - (right.y2 || 0)
-
-        if (by !== 0 || ay !== 0) {
-          this.result = '含y变量请用方程组(;分隔)'
-          return
-        }
 
         var eps = 1e-9
         if (Math.abs(a) > eps) {
@@ -443,7 +442,8 @@
           this.addHistory(this.expression, this.result)
         }
       } catch (e) {
-        this.result = '无法解析'
+        // 多项式解析不支持（如括号指数、分式、未知符号）时转数值求解
+        this.solveEquationNumerical(parts[0], parts[1])
       }
     },
 
@@ -463,16 +463,28 @@
           return
         }
 
-        var l1 = this.parseLinear(e1[0])
-        var r1 = this.parseLinear(e1[1])
-        var l2 = this.parseLinear(e2[0])
-        var r2 = this.parseLinear(e2[1])
+        var l1 = this.parsePolynomial(e1[0])
+        var r1 = this.parsePolynomial(e1[1])
+        var l2 = this.parsePolynomial(e2[0])
+        var r2 = this.parsePolynomial(e2[1])
 
-        var a1 = (l1.x || 0) - (r1.x || 0)
-        var b1 = (l1.y || 0) - (r1.y || 0)
+        // 仅支持一次项：x1、y1、常数
+        var polys = [l1, r1, l2, r2]
+        for (var pi = 0; pi < polys.length; pi++) {
+          var ks = Object.keys(polys[pi])
+          for (var kj = 0; kj < ks.length; kj++) {
+            if (ks[kj] !== 'x1' && ks[kj] !== 'y1' && ks[kj] !== 'const') {
+              this.result = '仅支持二元一次方程组'
+              return
+            }
+          }
+        }
+
+        var a1 = (l1.x1 || 0) - (r1.x1 || 0)
+        var b1 = (l1.y1 || 0) - (r1.y1 || 0)
         var c1 = (r1.const || 0) - (l1.const || 0)
-        var a2 = (l2.x || 0) - (r2.x || 0)
-        var b2 = (l2.y || 0) - (r2.y || 0)
+        var a2 = (l2.x1 || 0) - (r2.x1 || 0)
+        var b2 = (l2.y1 || 0) - (r2.y1 || 0)
         var c2 = (r2.const || 0) - (l2.const || 0)
 
         var d = a1 * b2 - a2 * b1
@@ -489,6 +501,16 @@
       } catch (e) {
         this.result = '无法解析'
       }
+    },
+
+    normalizeAbs(s) {
+      if (s.indexOf('|') === -1) return s
+      var segs = s.split('|')
+      var out = ''
+      for (var i = 0; i < segs.length; i++) {
+        out += (i % 2 === 1) ? ('abs(' + segs[i] + ')') : segs[i]
+      }
+      return out
     },
 
     hasTranscendental(s) {
@@ -584,7 +606,12 @@
             if (Math.abs(fm) < 1e-9) { a = b = m; break }
             if (fa * fm < 0) { b = m } else { a = m; fa = fm }
           }
-          roots.push((a + b) / 2)
+          // 验证确为根：排除分母为零的极点（-∞→+∞ 跳变）
+          var r = (a + b) / 2
+          var fr = f(r)
+          if (!isNaN(fr) && Math.abs(fr) < 1e-5) {
+            roots.push(r)
+          }
         } else if (Math.abs(samples[i].y) < 1e-9) {
           roots.push(samples[i].x)
         }
@@ -616,6 +643,9 @@
     parsePolynomial(s) {
       var tokens = this.tokenize(s)
       var result = this.parseExpr(tokens, 0)
+      if (result.pos < tokens.length) {
+        throw new Error('leftover tokens')
+      }
       return result.coeffs
     },
 
@@ -688,8 +718,19 @@
         var endPos = exprRes.pos
         if (endPos < tokens.length && tokens[endPos] === ')') {
           endPos++
+        } else {
+          throw new Error('missing )')
         }
-        return { coeffs: exprRes.coeffs, pos: endPos }
+        var poly = exprRes.coeffs
+        // 括号组后的指数：(x+2)^2
+        if (endPos < tokens.length && tokens[endPos] === '^') {
+          if (endPos + 1 >= tokens.length) throw new Error('bad power')
+          var pw = parseInt(tokens[endPos + 1])
+          if (isNaN(pw) || pw < 0 || String(pw) !== tokens[endPos + 1]) throw new Error('bad power')
+          poly = this.polyPow(poly, pw)
+          endPos += 2
+        }
+        return { coeffs: poly, pos: endPos }
       }
 
       if (t === 'x' || t === 'y') {
@@ -732,17 +773,44 @@
       return { coeffs: {}, pos: pos + 1 }
     },
 
+    polyPow(poly, n) {
+      var result = { const: 1 }
+      for (var i = 0; i < n; i++) {
+        result = this.multiplyPoly(result, poly)
+      }
+      return result
+    },
+
+    keyToExp(key) {
+      if (key === 'const') return { nx: 0, ny: 0 }
+      var m = /^x(\d*)y(\d*)$/.exec(key)
+      if (m) return { nx: m[1] === '' ? 1 : parseInt(m[1]), ny: m[2] === '' ? 1 : parseInt(m[2]) }
+      var mx = /^x(\d+)$/.exec(key)
+      if (mx) return { nx: parseInt(mx[1]), ny: 0 }
+      var my = /^y(\d+)$/.exec(key)
+      if (my) return { nx: 0, ny: parseInt(my[1]) }
+      return null
+    },
+
+    expToKey(nx, ny) {
+      if (nx === 0 && ny === 0) return 'const'
+      if (ny === 0) return 'x' + nx
+      if (nx === 0) return 'y' + ny
+      return 'x' + (nx === 1 ? '' : nx) + 'y' + (ny === 1 ? '' : ny)
+    },
+
     multiplyPoly(c1, c2) {
       var result = {}
       for (var k1 in c1) {
         if (!c1.hasOwnProperty(k1)) continue
+        var e1 = this.keyToExp(k1)
+        if (!e1) throw new Error('bad key')
         for (var k2 in c2) {
           if (!c2.hasOwnProperty(k2)) continue
+          var e2 = this.keyToExp(k2)
+          if (!e2) throw new Error('bad key')
           var v = c1[k1] * c2[k2]
-          var deg1 = k1 === 'const' ? 0 : parseInt(k1.substring(1))
-          var deg2 = k2 === 'const' ? 0 : parseInt(k2.substring(1))
-          var newDeg = deg1 + deg2
-          var newKey = newDeg === 0 ? 'const' : 'x' + newDeg
+          var newKey = this.expToKey(e1.nx + e2.nx, e1.ny + e2.ny)
           result[newKey] = (result[newKey] || 0) + v
         }
       }
@@ -750,11 +818,11 @@
     },
 
     dividePoly(c1, c2) {
-      // 仅支持除以纯数字
+      // 仅支持除以纯数字，否则抛出转数值求解
       var keys = Object.keys(c2)
       if (keys.length === 1 && keys[0] === 'const') {
         var divisor = c2.const
-        if (divisor === 0) return c1
+        if (divisor === 0) throw new Error('divide by zero')
         var result = {}
         for (var k in c1) {
           if (c1.hasOwnProperty(k)) {
@@ -763,55 +831,7 @@
         }
         return result
       }
-      return c1
-    },
-
-    // ===== 线性表达式解析（用于方程组）=====
-    parseLinear(s) {
-      var tokens = this.tokenize(s)
-      var result = { x: 0, y: 0, const: 0 }
-      var i = 0
-      var sign = 1
-
-      while (i < tokens.length) {
-        var t = tokens[i]
-        if (t === '+') {
-          sign = 1
-          i++
-        } else if (t === '-') {
-          sign = -1
-          i++
-        } else if (t === '*' || t === '/' || t === '(' || t === ')' || t === '^') {
-          i++
-        } else if (t === 'x' || t === 'y') {
-          var coeff = sign
-          if (i > 0) {
-            var prev = tokens[i - 1]
-            if (prev !== '+' && prev !== '-' && prev !== '*' && prev !== '/' && prev !== '(') {
-              var num = parseFloat(prev)
-              if (!isNaN(num)) {
-                coeff = sign * num
-              }
-            }
-          }
-          result[t] = (result[t] || 0) + coeff
-          sign = 1
-          i++
-        } else {
-          var val = parseFloat(t)
-          if (!isNaN(val)) {
-            var nextT = tokens[i + 1]
-            if (nextT === 'x' || nextT === 'y') {
-              i++
-              continue
-            }
-            result.const = (result.const || 0) + sign * val
-          }
-          sign = 1
-          i++
-        }
-      }
-      return result
+      throw new Error('poly divide')
     },
 
     tokenize(s) {
@@ -845,6 +865,9 @@
         } else if (ch === 'x' || ch === 'y') {
           tokens.push(ch)
           i++
+        } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+          // 未知变量字母（e、sin 等未拦截字符）直接报错，避免静默丢字
+          throw new Error('unknown variable: ' + ch)
         } else {
           i++
         }
