@@ -1,0 +1,264 @@
+<template>
+  <div class="page">
+    <!-- 置顶栏背景 -->
+    <div class="top-bar-bg"></div>
+
+    <!-- 时钟 -->
+    <text class="clock-text">{{currentTime}}</text>
+
+    <!-- 标题 -->
+    <text class="app-title">矩阵计算器</text>
+
+    <!-- 菜单列表（可滚动） -->
+    <list class="menu-list">
+      <list-item class="section-header" if="{{hasPinned}}">
+        <text class="section-text">置顶功能</text>
+      </list-item>
+      <list-item class="menu-item item-pinned" for="{{pinnedItems}}" tid="id" onclick="openItem($item)" onlongpress="togglePin($item)">
+        <text class="menu-text">{{$item.label}}</text>
+        <text class="pin-badge">置顶</text>
+      </list-item>
+      <list-item class="section-header" if="{{hasPinned}}">
+        <text class="section-text">全部功能</text>
+      </list-item>
+      <list-item class="menu-item" for="{{menuItems}}" tid="id" onclick="openItem($item)" onlongpress="togglePin($item)">
+        <text class="menu-text">{{$item.label}}</text>
+      </list-item>
+      <list-item class="menu-spacer">
+        <text class="spacer-text"></text>
+      </list-item>
+    </list>
+  </div>
+</template>
+
+<style>
+  .page {
+    width: 192px;
+    height: 470px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .top-bar-bg {
+    width: 192px;
+    height: 24px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 1;
+    background-color: #000000;
+  }
+
+  .clock-text {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 5px;
+    z-index: 2;
+  }
+
+  .app-title {
+    color: #ffffff;
+    font-size: 19px;
+    font-weight: 800;
+    margin-top: 1px;
+    z-index: 2;
+  }
+
+  .menu-list {
+    width: 188px;
+    height: 414px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+  }
+
+  .menu-item {
+    width: 176px;
+    height: 56px;
+    border-radius: 14px;
+    background-color: rgba(147, 112, 219, 0.35);
+    border-width: 2px;
+    border-color: #9370db;
+    margin-top: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 16px;
+    padding-right: 14px;
+  }
+
+  .menu-text {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  .item-pinned {
+    border-color: #6495ed;
+    background-color: rgba(100, 149, 237, 0.35);
+  }
+
+  .pin-badge {
+    color: #6495ed;
+    font-size: 9px;
+    font-weight: 800;
+  }
+
+  .section-header {
+    width: 176px;
+    height: 22px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  .section-text {
+    color: #9370db;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .menu-spacer {
+    width: 176px;
+    height: 40px;
+  }
+
+  .spacer-text {
+    font-size: 1px;
+  }
+
+  /* ==== 字号与按键放大 / 更圆角 ==== */
+  .clock-text { font-size: 15px; }
+  .app-title { font-size: 21px; }
+  .menu-list { height: 404px; }
+  .menu-item { height: 62px; border-radius: 22px; }
+  .menu-text { font-size: 19px; }
+  .section-header { height: 24px; }
+  .section-text { font-size: 12px; }
+  .pin-badge { font-size: 10px; }
+</style>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import prompt from '@system.prompt'
+
+  var PIN_KEY = 'index_pinned_v1'
+
+  var MENU = [
+    { id: 'standard', label: '标准计算器', route: '/pages/Standard' },
+    { id: 'scientific', label: '科学计算器', route: '/pages/Scientific' },
+    { id: 'unit', label: '单位换算', route: '/pages/Unit' },
+    { id: 'graph', label: '函数图像', route: '/pages/Graph' },
+    { id: 'triangle', label: '三角几何', route: '/pages/Triangle' },
+    { id: 'derivative', label: '求导函数值', route: '/pages/Derivative' },
+    { id: 'monotonicity', label: '函数单调性计算', route: '/pages/Monotonicity' },
+    { id: 'linearregression', label: '线性回归计算', route: '/pages/LinearRegression' },
+    { id: 'bmi', label: 'BMI计算', route: '/pages/BMI' },
+    { id: 'currency', label: '货币换算', route: '/pages/Currency' },
+    { id: 'baseconverter', label: '进制转换', route: '/pages/BaseConverter' },
+    { id: 'studytools', label: '公式大全', route: '/pages/Formulas' },
+    { id: 'equation', label: '解方程', route: '/pages/Equation' },
+    { id: 'inequality', label: '解不等式', route: '/pages/Inequality' },
+    { id: 'inequalitygroup', label: '解不等式组', route: '/pages/InequalityGroup' },
+    { id: 'chemical', label: '化学方程式', route: '/pages/Chemical' },
+    { id: 'kinship', label: '家族称谓计算', route: '/pages/Kinship' },
+    { id: 'numbercase', label: '数字大小写转换', route: '/pages/NumberCase' },
+    { id: 'random', label: '随机数生成', route: '/pages/Random' },
+    { id: 'history', label: '历史记录', route: '/pages/History' },
+    { id: 'settings', label: '设置', route: '/pages/Settings' }
+  ]
+
+  export default {
+    private: {
+      currentTime: '00:00',
+      menuItems: MENU,
+      pinnedItems: [],
+      pinnedIds: [],
+      hasPinned: false
+    },
+
+    onInit() {
+      this.updateTime()
+      this.timer = setInterval(this.updateTime.bind(this), 10000)
+      this.loadPins()
+    },
+
+    onDestroy() {
+      if (this.timer) {
+        clearInterval(this.timer)
+      }
+    },
+
+    updateTime() {
+      var now = new Date()
+      var h = now.getHours()
+      var m = now.getMinutes()
+      if (h < 10) h = '0' + h
+      if (m < 10) m = '0' + m
+      this.currentTime = h + ':' + m
+    },
+
+    loadPins() {
+      var self = this
+      storage.get({
+        key: PIN_KEY,
+        success: function(data) {
+          if (data) {
+            try {
+              var ids = JSON.parse(data)
+              if (ids && ids.length > 0) {
+                self.pinnedIds = ids
+                self.rebuildPinned()
+              }
+            } catch (e) {}
+          }
+        }
+      })
+    },
+
+    rebuildPinned() {
+      var pinned = []
+      for (var i = 0; i < this.pinnedIds.length; i++) {
+        for (var j = 0; j < MENU.length; j++) {
+          if (MENU[j].id === this.pinnedIds[i]) {
+            pinned.push(MENU[j])
+            break
+          }
+        }
+      }
+      this.pinnedItems = pinned
+      this.hasPinned = pinned.length > 0
+    },
+
+    togglePin(item) {
+      var id = item.id
+      var idx = this.pinnedIds.indexOf(id)
+      if (idx >= 0) {
+        this.pinnedIds.splice(idx, 1)
+        prompt.showToast({ message: '已取消置顶' })
+      } else {
+        this.pinnedIds.push(id)
+        prompt.showToast({ message: '已置顶：' + item.label })
+      }
+      this.rebuildPinned()
+      storage.set({
+        key: PIN_KEY,
+        value: JSON.stringify(this.pinnedIds)
+      })
+    },
+
+    openItem(item) {
+      router.push({ uri: item.route })
+    }
+  }
+</script>
